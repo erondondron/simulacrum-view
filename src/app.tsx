@@ -1,8 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-
-function KinematicPage() {
-    return <h2>Кинематика</h2>;
-}
+import KinematicPage from './kinemathic';
 
 function HomePage() {
     return (
