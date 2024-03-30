@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import Queue from './queue';
 import { SCENE_CHANGES_WS, SCENE_PARAMS_URL } from './urls';
 import { Type, plainToClass } from 'class-transformer';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 class Point {
     constructor(
@@ -73,6 +74,8 @@ class SceneEventLoop {
         this.renderer = new THREE.WebGLRenderer({ canvas });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.render(this.scene, this.camera);
+
+        new OrbitControls(this.camera, this.renderer.domElement);
     }
 
     public async run(): Promise<void> {
