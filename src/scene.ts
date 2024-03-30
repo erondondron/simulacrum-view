@@ -12,13 +12,12 @@ class Point {
 
 class ObjectStatement {
     // uuid!: string;
-    // time!: number;
 
     @Type(() => Point)
-    coordinates: Point | undefined;
+    coordinates!: Point;
 
     @Type(() => Point)
-    rotation: Point | undefined;
+    rotation!: Point;
 }
 
 class CameraStatement {
@@ -33,15 +32,24 @@ class CameraStatement {
 
 class SceneStatement {
     @Type(() => CameraStatement)
-    camera: CameraStatement | undefined;
+    camera?: CameraStatement;
 
     @Type(() => ObjectStatement)
     objects: Array<ObjectStatement> = [];
 }
 
-enum WebsocketCommand {
-    Start = "start",
-    Pause = "pause",
+enum MessageType {
+    Request = "request",
+    Response = "response",
+}
+
+class WebSocketMessage {
+    public type: MessageType = MessageType.Response;
+    public payload?: string
+}
+
+class StatementsBuffer {
+    constructor(public length: number = 0) { }
 }
 
 class SceneEventLoop {
@@ -49,6 +57,8 @@ class SceneEventLoop {
     private camera: THREE.PerspectiveCamera;
     private renderer: THREE.WebGLRenderer;
     private changes: Queue<SceneStatement> = new Queue();
+    private timeStep: number = 0;
+    private stepDuration = 1000 / 30;
 
     // FIXME(erondondron): удолить после доработок
     private cube: THREE.Mesh;
@@ -81,26 +91,19 @@ class SceneEventLoop {
         const socket = new WebSocket('ws://localhost:8000/ws');
 
         socket.onmessage = (event: MessageEvent) => {
-            const statement = plainToClass(SceneStatement, JSON.parse(event.data));
-            this.changes.enqueue(statement);
+            const message = plainToClass(WebSocketMessage, JSON.parse(event.data));
+            if (message.type == MessageType.Request) {
+                const bufferInfo = new StatementsBuffer(this.changes.length());
+                const message = new WebSocketMessage();
+                message.payload = JSON.stringify(bufferInfo);
+                socket.send(JSON.stringify(message));
+                return;
+            }
+            if (message.payload) {
+                const statement = plainToClass(SceneStatement, JSON.parse(message.payload));
+                this.changes.enqueue(statement);
+            } 
         };
-
-        let socketState: string = WebsocketCommand.Start.valueOf();
-        const controlQueueCapacity = () => {
-            const minQueueSize = 500;
-            if (this.changes.length() < minQueueSize && socketState == WebsocketCommand.Pause) {
-                socketState = WebsocketCommand.Start.valueOf()
-                socket.send(socketState);
-            }
-            const maxQueueSize = 1000;
-            if (this.changes.length() > maxQueueSize && socketState == WebsocketCommand.Start) {
-                socketState = WebsocketCommand.Pause.valueOf()
-                socket.send(socketState);
-            }
-        }
-
-        const controlInterval = 500;
-        setInterval(controlQueueCapacity, controlInterval);
     }
 
     // TODO(erondondron): Изучить разные возможности создания объектов
@@ -111,13 +114,15 @@ class SceneEventLoop {
     }
 
     private animate = (): void => {
-        requestAnimationFrame(this.animate);
-        if (!this.changes.isEmpty()) {
+        const timePassed = Date.now() - this.timeStep;
+        if (timePassed > this.stepDuration && !this.changes.isEmpty()) {
             const statement = this.changes.dequeue();
             this.cube.rotation.x = statement.objects[0].rotation.x;
             this.cube.rotation.y = statement.objects[0].rotation.y;
+            this.timeStep = Date.now();
+            this.renderer.render(this.scene, this.camera);
         }
-        this.renderer.render(this.scene, this.camera);
+        requestAnimationFrame(this.animate);
     }
 
     // TODO(erondondron): Позаботиться об очистке ресурсов

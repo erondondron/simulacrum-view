@@ -22,8 +22,8 @@ class Queue<T> {
 
     public dequeue(): T {
         const value = this.data[this.start];
-        this.start += 1;
         delete this.data[this.start];
+        this.start += 1;
         return value;
     }
 }
