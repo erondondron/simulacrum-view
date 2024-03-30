@@ -58,10 +58,10 @@ class SceneEventLoop {
     private renderer: THREE.WebGLRenderer;
 
     private changes: Queue<SceneStatement> = new Queue();
-    private objects: Record<number, THREE.Mesh> = {};
+    private objects: Record<number, THREE.Object3D> = {};
 
     private timeStep: number = 0;
-    private stepDuration = 1000 / 30;
+    private stepDuration = 1000 / 60;
 
     constructor(canvas: HTMLCanvasElement) {
         this.scene = new THREE.Scene();
@@ -71,6 +71,7 @@ class SceneEventLoop {
 
         this.renderer = new THREE.WebGLRenderer({ canvas });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.render(this.scene, this.camera);
     }
 
     public async run(): Promise<void> {
@@ -86,10 +87,22 @@ class SceneEventLoop {
         for (const objInfo of scene.objects) {
             const geometry = new THREE.BoxGeometry();
             const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            const obj = new THREE.Mesh(geometry, material);
+            const mesh = new THREE.Mesh(geometry, material);
+
+            // Создаем геометрию для рёбер
+            const edges = new THREE.EdgesGeometry(geometry);
+            const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Чёрный цвет
+            const lineSegments = new THREE.LineSegments(edges, edgesMaterial);
+
+            // Группируем меш и рёбра вместе
+            const obj = new THREE.Group();
+            obj.add(mesh);
+            obj.add(lineSegments);
+
             this.objects[objInfo.id] = obj;
             this.scene.add(obj)
         }
+        this.applyChanges(scene);
         this.renderer.render(this.scene, this.camera);
     }
 
