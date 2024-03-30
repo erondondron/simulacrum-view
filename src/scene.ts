@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import Queue from './queue';
+import { SCENE_CHANGES_WS, SCENE_PARAMS_URL } from './urls';
 import { Type, plainToClass } from 'class-transformer';
 
 class Point {
@@ -81,7 +82,7 @@ class SceneEventLoop {
     }
 
     private async getSceneParameters(): Promise<void> {
-        const response = await fetch('http://localhost:8000/scene_params');
+        const response = await fetch(SCENE_PARAMS_URL);
         const sceneJson = await response.json();
         const scene = plainToClass(SceneStatement, sceneJson);
         for (const objInfo of scene.objects) {
@@ -107,7 +108,7 @@ class SceneEventLoop {
     }
 
     private getSceneChanges() {
-        const socket = new WebSocket('ws://localhost:8000/scene_changes');
+        const socket = new WebSocket(SCENE_CHANGES_WS);
 
         socket.onmessage = (event: MessageEvent) => {
             const message = plainToClass(WebSocketMessage, JSON.parse(event.data));
