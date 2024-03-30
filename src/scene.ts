@@ -11,7 +11,7 @@ class Point {
 }
 
 class ObjectStatement {
-    // uuid!: string;
+    id!: number;
 
     @Type(() => Point)
     coordinates!: Point;
@@ -56,12 +56,12 @@ class SceneEventLoop {
     private scene: THREE.Scene;
     private camera: THREE.PerspectiveCamera;
     private renderer: THREE.WebGLRenderer;
+
     private changes: Queue<SceneStatement> = new Queue();
+    private objects: Record<number, THREE.Mesh> = {};
+
     private timeStep: number = 0;
     private stepDuration = 1000 / 30;
-
-    // FIXME(erondondron): удолить после доработок
-    private cube: THREE.Mesh;
 
     constructor(canvas: HTMLCanvasElement) {
         this.scene = new THREE.Scene();
@@ -71,24 +71,30 @@ class SceneEventLoop {
 
         this.renderer = new THREE.WebGLRenderer({ canvas });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-
-        // TODO(erondondron): Удалить после реализации getSceneParameters и addObject
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        this.cube = new THREE.Mesh(geometry, material);
-        this.scene.add(this.cube);
     }
 
-    public run(): void {
+    public async run(): Promise<void> {
+        await this.getSceneParameters();
         this.getSceneChanges();
         this.animate();
     }
 
-    // TODO(erondondron): Получать начальные параметры сцены перед запуском отдельным rest запросом
-    private getSceneParameters() { }
+    private async getSceneParameters(): Promise<void> {
+        const response = await fetch('http://localhost:8000/scene_params');
+        const sceneJson = await response.json();
+        const scene = plainToClass(SceneStatement, sceneJson);
+        for (const objInfo of scene.objects) {
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const obj = new THREE.Mesh(geometry, material);
+            this.objects[objInfo.id] = obj;
+            this.scene.add(obj)
+        }
+        this.renderer.render(this.scene, this.camera);
+    }
 
     private getSceneChanges() {
-        const socket = new WebSocket('ws://localhost:8000/ws');
+        const socket = new WebSocket('ws://localhost:8000/scene_changes');
 
         socket.onmessage = (event: MessageEvent) => {
             const message = plainToClass(WebSocketMessage, JSON.parse(event.data));
@@ -106,19 +112,26 @@ class SceneEventLoop {
         };
     }
 
-    // TODO(erondondron): Изучить разные возможности создания объектов
-    private addObject(): void { }
+    private applyChanges(statement: SceneStatement): void {
+        for (const objInfo of statement.objects) {
+            const obj = this.objects[objInfo.id];
+            if (!obj) continue;
 
-    private getObject(objectUUID: string): THREE.Object3D | undefined {
-        return this.scene.getObjectByProperty('uuid', objectUUID);
+            obj.position.x = objInfo.coordinates.x;
+            obj.position.y = objInfo.coordinates.y;
+            obj.position.z = objInfo.coordinates.z;
+
+            obj.rotation.x = objInfo.rotation.x;
+            obj.rotation.y = objInfo.rotation.y;
+            obj.rotation.z = objInfo.rotation.z;
+        }
     }
 
     private animate = (): void => {
         const timePassed = Date.now() - this.timeStep;
         if (timePassed > this.stepDuration && !this.changes.isEmpty()) {
             const statement = this.changes.dequeue();
-            this.cube.rotation.x = statement.objects[0].rotation.x;
-            this.cube.rotation.y = statement.objects[0].rotation.y;
+            this.applyChanges(statement);
             this.timeStep = Date.now();
             this.renderer.render(this.scene, this.camera);
         }
