@@ -47,11 +47,11 @@ class SimulacrumWindow extends GraphicsWindow {
 
     protected addObject(objectInfo: ObjectStatement): void {
         const geometry = new THREE.SphereGeometry(1, 32, 32)
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+        const material = new THREE.MeshBasicMaterial({ color: 'white' })
         const mesh = new THREE.Mesh(geometry, material)
 
         const edges = new THREE.EdgesGeometry(geometry);
-        const edgesMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+        const edgesMaterial = new THREE.LineBasicMaterial({ color: 'black' });
         const lineSegments = new THREE.LineSegments(edges, edgesMaterial);
 
         const obj = new THREE.Group();
@@ -63,6 +63,7 @@ class SimulacrumWindow extends GraphicsWindow {
     }
 
     protected async sceneInit(): Promise<void> {
+        this.scene.background = new THREE.Color(0xfbf0d1);
         const response = await fetch(SCENE_PARAMS_URL)
         const sceneJson = await response.json()
         const scene = plainToClass(SceneStatement, sceneJson)
