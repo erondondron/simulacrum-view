@@ -48,15 +48,15 @@ class SimulacrumWindow extends GraphicsWindow {
     protected addObject(objectInfo: ObjectStatement): void {
         const geometry = new THREE.SphereGeometry(100, 32, 32)
         const material = new THREE.MeshBasicMaterial({ color: 'white' })
-        const mesh = new THREE.Mesh(geometry, material)
+        const obj = new THREE.Mesh(geometry, material)
 
-        const edges = new THREE.EdgesGeometry(geometry);
-        const edgesMaterial = new THREE.LineBasicMaterial({ color: 'black' });
-        const lineSegments = new THREE.LineSegments(edges, edgesMaterial);
+        // const edges = new THREE.EdgesGeometry(geometry);
+        // const edgesMaterial = new THREE.LineBasicMaterial({ color: 'black' });
+        // const lineSegments = new THREE.LineSegments(edges, edgesMaterial);
 
-        const obj = new THREE.Group();
-        obj.add(mesh);
-        obj.add(lineSegments);
+        // const obj = new THREE.Group();
+        // obj.add(mesh);
+        // obj.add(lineSegments);
 
         this.objects[objectInfo.id] = obj;
         this.scene.add(obj)

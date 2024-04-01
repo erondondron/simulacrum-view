@@ -1,38 +1,28 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { OutlineEffect } from 'three/addons/effects/OutlineEffect.js'
 
 class GraphicsWindow {
+    protected camera: THREE.OrthographicCamera = new THREE.OrthographicCamera()
     protected scene: THREE.Scene = new THREE.Scene()
-    protected renderer!: THREE.WebGLRenderer
-    protected camera!: THREE.OrthographicCamera
+    protected renderer!: OutlineEffect
 
     private FPS: number = 60
     private timeStep: number = 0
     private stepDuration: number = 1000 / this.FPS
 
     constructor(protected container: HTMLDivElement) {
-        this.initRenderer()
-        this.initCamera()
-        this.renderer.render(this.scene, this.camera)
+        const renderer = new THREE.WebGLRenderer({ antialias: true })
+        this.renderer = new OutlineEffect(renderer)
+
+        this.container.appendChild(renderer.domElement)
+        new OrbitControls(this.camera, renderer.domElement)
+
+        this.camera.position.z = this.container.clientWidth
+        this.resizeWindow()
 
         window.addEventListener('resize', () => this.resizeWindow())
-        new OrbitControls(this.camera, this.renderer.domElement)
-    }
-
-    protected initRenderer(): void {
-        this.renderer = new THREE.WebGLRenderer({ antialias: true })
-        this.container.appendChild(this.renderer.domElement)
-        this.resizeWindow()
-    }
-
-    protected initCamera(): void {
-        this.camera = new THREE.OrthographicCamera(
-            this.container.clientWidth / -2,
-            this.container.clientWidth / 2,
-            this.container.clientHeight / 2,
-            this.container.clientHeight / -2,
-        )
-        this.camera.position.z = this.container.clientWidth;
+        this.renderer.render(this.scene, this.camera)
     }
 
     public async run(): Promise<void> {
@@ -59,6 +49,11 @@ class GraphicsWindow {
     }
 
     private resizeWindow(): void {
+        this.camera.left = this.container.clientWidth / -2
+        this.camera.right = this.container.clientWidth / 2
+        this.camera.top = this.container.clientHeight / 2
+        this.camera.bottom = this.container.clientHeight / -2
+        this.camera.updateProjectionMatrix()
         this.renderer.setSize(
             this.container.clientWidth,
             this.container.clientHeight,
