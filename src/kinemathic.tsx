@@ -1,27 +1,22 @@
-import { useEffect, useRef } from 'react';
-import Scene from './scene';
-
-function renderScheme(canvas: HTMLCanvasElement) {
-    const scene = new Scene(canvas);
-    scene.run();
-    return () => { scene.cleanup(); };
-}
+import { useEffect, useRef } from 'react'
+import SimulacrumWindow from './graphics/simulacrum'
 
 function KinematicPage() {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const divRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        if (canvasRef.current) {
-            return renderScheme(canvasRef.current);
+        if (divRef.current) {
+            const scene = new SimulacrumWindow(divRef.current)
+            scene.run()
+            return () => { scene.cleanup(); }
         }
-    }, []);
+    }, [])
 
     return (
-        <div>
-            <h2>Кинематика</h2>
-            <canvas ref={canvasRef} />
-        </div>
-    );
+        <>
+            <div ref={divRef}></div>
+        </>
+    )
 }
 
-export default KinematicPage;
+export default KinematicPage
