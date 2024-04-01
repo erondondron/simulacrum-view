@@ -3,20 +3,36 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 class GraphicsWindow {
     protected scene: THREE.Scene = new THREE.Scene()
-    protected renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer({ antialias: true })
-    protected camera: THREE.PerspectiveCamera =new THREE.PerspectiveCamera(25)
+    protected renderer!: THREE.WebGLRenderer
+    protected camera!: THREE.OrthographicCamera
 
     private FPS: number = 60
     private timeStep: number = 0
     private stepDuration: number = 1000 / this.FPS
 
     constructor(protected container: HTMLDivElement) {
-        this.container.appendChild(this.renderer.domElement)
-        this.resizeWindow()
+        this.initRenderer()
+        this.initCamera()
         this.renderer.render(this.scene, this.camera)
 
         window.addEventListener('resize', () => this.resizeWindow())
         new OrbitControls(this.camera, this.renderer.domElement)
+    }
+
+    protected initRenderer(): void {
+        this.renderer = new THREE.WebGLRenderer({ antialias: true })
+        this.container.appendChild(this.renderer.domElement)
+        this.resizeWindow()
+    }
+
+    protected initCamera(): void {
+        this.camera = new THREE.OrthographicCamera(
+            this.container.clientWidth / -2,
+            this.container.clientWidth / 2,
+            this.container.clientHeight / 2,
+            this.container.clientHeight / -2,
+        )
+        this.camera.position.z = this.container.clientWidth;
     }
 
     public async run(): Promise<void> {
@@ -43,13 +59,10 @@ class GraphicsWindow {
     }
 
     private resizeWindow(): void {
-        const aspectRatio = this.container.clientWidth / this.container.clientHeight
-
-        this.camera.aspect = aspectRatio
-        this.camera.updateProjectionMatrix()
-        
-        this.renderer.setPixelRatio(aspectRatio)
-        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
+        this.renderer.setSize(
+            this.container.clientWidth,
+            this.container.clientHeight,
+        )
     }
 
     // TODO(erondondron): Позаботиться об очистке ресурсов

@@ -46,7 +46,7 @@ class SimulacrumWindow extends GraphicsWindow {
     private objects: Record<number, THREE.Object3D> = {}
 
     protected addObject(objectInfo: ObjectStatement): void {
-        const geometry = new THREE.SphereGeometry(1, 32, 32)
+        const geometry = new THREE.SphereGeometry(100, 32, 32)
         const material = new THREE.MeshBasicMaterial({ color: 'white' })
         const mesh = new THREE.Mesh(geometry, material)
 
@@ -71,7 +71,6 @@ class SimulacrumWindow extends GraphicsWindow {
         for (const objInfo of scene.objects)
             this.addObject(objInfo)
         this.applayStepChanges()
-        this.camera.position.z = 5
         this.renderer.render(this.scene, this.camera);
     }
 
