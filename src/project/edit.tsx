@@ -20,8 +20,11 @@ export function SimulacrumEditPage() {
         <>
             <div className="controlPanel">
                 <h3>{project.name}</h3>
-                <button>Save</button>
-                <button>Cancel</button>
+                <div className="controlButtons">
+                    <button>Save</button>
+                    <button>Cancel</button>
+                    <button>Delete</button>
+                </div>
             </div>
             <div className="simulacrum" ref={divRef}></div>
         </>

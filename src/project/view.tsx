@@ -20,8 +20,10 @@ export function SimulacrumViewPage() {
     return (
         <>
             <div className="controlPanel">
-                <h3>{ project.name }</h3>
-                <button>Edit</button>
+                <h3>{project.name}</h3>
+                <div className="controlButtons">
+                    <button>Edit</button>
+                </div>
             </div>
             <div className="simulacrum" ref={divRef}></div>
         </>
