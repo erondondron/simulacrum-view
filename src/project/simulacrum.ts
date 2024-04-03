@@ -81,7 +81,7 @@ class SimulacrumWindow extends GraphicsWindow {
         this.renderer.render(this.scene, this.camera);
     }
 
-    protected sceneEventLoopInit(): void {
+    public runCalculations(): void {
         const socket = new WebSocket(SCENE_CHANGES_WS);
 
         socket.onmessage = (event: MessageEvent) => {

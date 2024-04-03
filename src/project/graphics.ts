@@ -3,45 +3,42 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 class GraphicsWindow {
     protected camera: THREE.OrthographicCamera = new THREE.OrthographicCamera()
-    protected scene: THREE.Scene = new THREE.Scene()
     protected renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer({ antialias: true })
+    protected scene: THREE.Scene = new THREE.Scene()
+    protected sceneChanged: boolean = true
 
     private FPS: number = 60
     private timeStep: number = 0
     private stepDuration: number = 1000 / this.FPS
 
     constructor(protected container: HTMLDivElement) {
-        this.renderer = new THREE.WebGLRenderer({ antialias: true })
-
-        this.camera.position.z = this.container.clientWidth
-        this.resizeWindow()
-
         this.container.appendChild(this.renderer.domElement)
         new OrbitControls(this.camera, this.renderer.domElement)
 
+        this.camera.position.z = this.container.clientWidth
+        this.resizeWindow()
+        this.sceneInit()
+
         window.addEventListener('resize', () => this.resizeWindow())
-        this.renderer.render(this.scene, this.camera)
     }
 
-    public async run(): Promise<void> {
-        await this.sceneInit()
-        this.sceneEventLoopInit()
-        this.animate()
-    }
+    public runCalculations(): void { }
 
     protected async sceneInit(): Promise<void> { }
 
-    protected sceneEventLoopInit(): void { }
-
     protected applayStepChanges(): void { }
 
-    private animate = (): void => {
+    public animate = (): void => {
         const currentTimeStep = Date.now()
         const timePassed = currentTimeStep - this.timeStep
         if (timePassed > this.stepDuration) {
             this.applayStepChanges()
             this.timeStep = currentTimeStep
-            this.renderer.render(this.scene, this.camera);
+            this.sceneChanged = true
+        }
+        if (this.sceneChanged) {
+            this.renderer.render(this.scene, this.camera)
+            this.sceneChanged = false
         }
         requestAnimationFrame(this.animate)
     }

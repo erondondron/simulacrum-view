@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
-import { SimulacrumPage, Project } from './project/page'
+import { SimulacrumViewPage } from './project/view'
+import { SimulacrumEditPage } from './project/edit'
 import { plainToClass } from 'class-transformer'
 import { PROJECTS_URL } from './urls'
+import { Project } from './models'
 
 function HomePage() {
     const navigate = useNavigate();
@@ -16,7 +18,7 @@ function HomePage() {
             }
             const json = await response.json();
             const project = plainToClass(Project, json);
-            navigate(`/${project.uid}`, { state: project });
+            navigate(`/${project.uid}/edit`, { state: project });
         } catch (error) {
             console.error('При создании проекта возникла ошибка: ', error);
         }
@@ -62,7 +64,8 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/:uuid" element={<SimulacrumPage />} />
+                <Route path="/:uuid" element={<SimulacrumViewPage />} />
+                <Route path="/:uuid/edit" element={<SimulacrumEditPage />} />
             </Routes>
         </Router>
     );
