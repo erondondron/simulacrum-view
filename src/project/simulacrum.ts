@@ -120,4 +120,4 @@ class SimulacrumWindow extends GraphicsWindow {
     }
 }
 
-export default SimulacrumWindow;
+export default SimulacrumWindow

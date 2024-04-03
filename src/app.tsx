@@ -44,7 +44,7 @@ function HomePage() {
     return (
         <>
             <h1>Simulacrum</h1>
-            <div className='navigation'>
+            <div>
                 <button onClick={createNewProject}>Создать новый проект</button>
                 <h2>Доступные проекты:</h2>
                 <ul>
