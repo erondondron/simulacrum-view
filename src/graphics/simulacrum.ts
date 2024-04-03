@@ -46,20 +46,27 @@ class SimulacrumWindow extends GraphicsWindow {
     private objects: Record<number, THREE.Object3D> = {}
 
     protected addObject(objectInfo: ObjectStatement): void {
-        const geometry = new THREE.SphereGeometry(100, 32, 32)
-        const material = new THREE.MeshBasicMaterial({ color: 'white' })
-        const obj = new THREE.Mesh(geometry, material)
 
-        // const edges = new THREE.EdgesGeometry(geometry);
-        // const edgesMaterial = new THREE.LineBasicMaterial({ color: 'black' });
-        // const lineSegments = new THREE.LineSegments(edges, edgesMaterial);
+        let objectGeometry: THREE.BufferGeometry = new THREE.BoxGeometry(150, 150, 150)
+        let edgeGeometry = new THREE.EdgesGeometry(objectGeometry);
 
-        // const obj = new THREE.Group();
-        // obj.add(mesh);
-        // obj.add(lineSegments);
+        if (objectInfo.id % 2 === 1) {
+            objectGeometry = new THREE.SphereGeometry(100, 32, 32)
+            edgeGeometry = new THREE.EdgesGeometry(objectGeometry)
+        }
 
-        this.objects[objectInfo.id] = obj;
-        this.scene.add(obj)
+        const objectMaterial = new THREE.MeshBasicMaterial({ color: 'white' })
+        const object = new THREE.Mesh(objectGeometry, objectMaterial)
+
+        const edgeMaterial = new THREE.LineBasicMaterial({ color: 'black', linewidth: 100 })
+        const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial)
+
+        const group = new THREE.Group();
+        group.add(object);
+        group.add(edges);
+
+        this.objects[objectInfo.id] = group;
+        this.scene.add(group)
     }
 
     protected async sceneInit(): Promise<void> {

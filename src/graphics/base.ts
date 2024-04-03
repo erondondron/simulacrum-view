@@ -1,25 +1,23 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { OutlineEffect } from 'three/addons/effects/OutlineEffect.js'
 
 class GraphicsWindow {
     protected camera: THREE.OrthographicCamera = new THREE.OrthographicCamera()
     protected scene: THREE.Scene = new THREE.Scene()
-    protected renderer!: OutlineEffect
+    protected renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer({ antialias: true })
 
     private FPS: number = 60
     private timeStep: number = 0
     private stepDuration: number = 1000 / this.FPS
 
     constructor(protected container: HTMLDivElement) {
-        const renderer = new THREE.WebGLRenderer({ antialias: true })
-        this.renderer = new OutlineEffect(renderer)
-
-        this.container.appendChild(renderer.domElement)
-        new OrbitControls(this.camera, renderer.domElement)
+        this.renderer = new THREE.WebGLRenderer({ antialias: true })
 
         this.camera.position.z = this.container.clientWidth
         this.resizeWindow()
+
+        this.container.appendChild(this.renderer.domElement)
+        new OrbitControls(this.camera, this.renderer.domElement)
 
         window.addEventListener('resize', () => this.resizeWindow())
         this.renderer.render(this.scene, this.camera)
