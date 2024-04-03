@@ -5,14 +5,14 @@ import { Project } from '../models'
 import { PROJECTS_URL } from '../urls'
 
 export function SimulacrumEditPage() {
-    const navigate = useNavigate();
+    const navigate = useNavigate()
     const location = useLocation()
     const project: Project = location.state
     const divRef = useRef<HTMLDivElement>(null)
 
     const deleteProject = async () => {
         try {
-            await fetch(`${PROJECTS_URL}/${project.uid}`)
+            await fetch(`${PROJECTS_URL}/${project.uid}`, { method: 'DELETE' })
             navigate(`/`)
         } catch (error) {
             console.error('При удалении проекта возникла ошибка: ', error)
