@@ -4,7 +4,7 @@ import SimulacrumWindow from './simulacrum'
 import './page.css'
 
 export class Project {
-    public uuid!: string
+    public uid!: string
     public name: string = 'New Project'
 }
 
