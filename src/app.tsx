@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import KinematicPage from './kinemathic';
+import SimulacrumPage from './graphics/page';
 
 function HomePage() {
     return (
@@ -21,7 +21,7 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/kinemathic" element={<KinematicPage />} />
+                <Route path="/kinemathic" element={<SimulacrumPage title="Кинематика"/>} />
             </Routes>
         </Router>
     );
