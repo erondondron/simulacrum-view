@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import Queue from '../queue'
 import { SCENE_CHANGES_WS, SCENE_PARAMS_URL } from '../urls'
 import { Type, plainToClass } from 'class-transformer'
-import GraphicsWindow from './base'
+import GraphicsWindow from './graphics'
 
 enum MessageType {
     Request = "request",
