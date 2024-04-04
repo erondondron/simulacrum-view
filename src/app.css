@@ -59,6 +59,20 @@ div {
     margin: 5px;
     margin-left: 15px;
     margin-right: 15px;
+    flex-direction: row;
+}
+.editableProjectName {
+    font-family: inherit;
+    font-size: 1.17em;
+    font-weight: bold;
+    border: none;
+    background: none;
+    margin: 0;
+    margin-left: 15px;
+    color: rgba(255, 255, 255, 0.87);
+}
+.editableProjectName:focus {
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
 h1 {

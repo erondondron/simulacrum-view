@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import SimulacrumWindow from './simulacrum'
 import { Project } from '../models'
@@ -9,7 +9,24 @@ export function SimulacrumEditPage() {
     const divRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
     const location = useLocation()
-    let project: Project = location.state
+
+    const project: Project = location.state
+    const [projectName, setProjectName] = useState<string>(project.name)
+
+
+    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setProjectName(event.target.value)
+        project.name = event.target.value
+    }
+
+    const saveProject = () => {
+        fetch(`${PROJECTS_URL}/${project.uid}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(project),
+        })
+        navigate(`/${project.uid}`, { state: project })
+    }
 
     const cancelChanges = async () => {
         try {
@@ -18,8 +35,8 @@ export function SimulacrumEditPage() {
                 throw new Error('Не удалось получить исходный проект');
             }
             const json = await response.json();
-            project = plainToClass(Project, json);
-            navigate(`/${project.uid}`, { state: project })
+            const initProject = plainToClass(Project, json);
+            navigate(`/${project.uid}`, { state: initProject })
         } catch (error) {
             console.error('При отмене изменений возникла ошибка: ', error);
         }
@@ -45,9 +62,14 @@ export function SimulacrumEditPage() {
     return (
         <>
             <div className="controlPanel">
-                <h3>{project.name}</h3>
+                <input
+                    className="editableProjectName"
+                    type="text"
+                    value={projectName}
+                    onChange={handleNameChange}
+                />
                 <div className="controlButtons">
-                    <button>Save</button>
+                    <button onClick={saveProject}>Save</button>
                     <button onClick={cancelChanges}>Cancel</button>
                     <button onClick={deleteProject}>Delete</button>
                 </div>
