@@ -62,7 +62,7 @@ div {
 .modelsPanel > div {
     width: 45%;
 }
-.modelsPanel > text {
+.modelsPanel > span {
     text-align: center;
     padding: 5%;
     width: 100%;

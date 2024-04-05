@@ -44,6 +44,25 @@ class BufferStatement {
 class SimulacrumWindow extends GraphicsWindow {
     private eventLoop: Queue<SceneStatement> = new Queue()
     private objects: Record<number, THREE.Object3D> = {}
+    public draggedObject: string | null = null
+    private droppedHook: ((value: string | null) => void) | null = null
+
+    constructor(container: HTMLDivElement) {
+        super(container)
+        this.container.addEventListener('click', this.onMouseClicked.bind(this));
+    }
+
+    public setDragAndDropHook(updateSelectedObject: (value: string | null) => void) {
+        this.droppedHook = updateSelectedObject
+    }
+
+    protected onMouseClicked(event: MouseEvent) {
+        if (this.draggedObject === null)
+            return
+        this.draggedObject = null
+        if (this.droppedHook)
+            this.droppedHook(null)
+    }
 
     protected addObject(objectInfo: ObjectStatement): void {
 

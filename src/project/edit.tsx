@@ -6,21 +6,35 @@ import { PROJECTS_URL } from '../urls'
 import { plainToClass } from 'class-transformer'
 
 export function SimulacrumEditPage() {
-    const divRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
     const location = useLocation()
-
     const project: Project = location.state
-    const [projectName, setProjectName] = useState<string>(project.name)
-    const [containerClicked, setContainerClicked] = useState<string | null>(null)
 
-    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const simulacrumContainer = useRef<HTMLDivElement>(null)
+    const [simulacrum, setSimulacrum] = useState<SimulacrumWindow | null>(null)
+
+    const [projectName, setProjectName] = useState<string>(project.name)
+    const [selectedModel, setSelectedModel] = useState<string | null>(null)
+
+    useEffect(() => {
+        if (simulacrumContainer.current) {
+            const newSimulacrum = new SimulacrumWindow(simulacrumContainer.current)
+            newSimulacrum.setDragAndDropHook(setSelectedModel)
+            setSimulacrum(newSimulacrum)
+            newSimulacrum.animate()
+            return () => { newSimulacrum.cleanup(); }
+        }
+    }, [])
+
+    const editProjectName = (event: React.ChangeEvent<HTMLInputElement>) => {
         setProjectName(event.target.value)
         project.name = event.target.value
     }
 
-    const handleContainerClick = (container: string) => {
-        setContainerClicked(container === containerClicked ? null : container);
+    const selectModel = (container: string) => {
+        if (simulacrum)
+            simulacrum.draggedObject = container
+        setSelectedModel(container === selectedModel ? null : container);
     }
 
     const saveProject = () => {
@@ -32,7 +46,7 @@ export function SimulacrumEditPage() {
         navigate(`/${project.uid}`, { state: project })
     }
 
-    const cancelChanges = async () => {
+    const cancelProjectChanges = async () => {
         try {
             const response = await fetch(`${PROJECTS_URL}/${project.uid}`);
             if (!response.ok) {
@@ -55,14 +69,6 @@ export function SimulacrumEditPage() {
         }
     }
 
-    useEffect(() => {
-        if (divRef.current) {
-            const scene = new SimulacrumWindow(divRef.current)
-            scene.animate()
-            return () => { scene.cleanup(); }
-        }
-    }, [])
-
     return (
         <>
             <div className="controlPanel">
@@ -70,27 +76,27 @@ export function SimulacrumEditPage() {
                     className="editableProjectName"
                     type="text"
                     value={projectName}
-                    onChange={handleNameChange}
+                    onChange={editProjectName}
                 />
                 <div className="controlButtons">
                     <button onClick={saveProject}>Save</button>
-                    <button onClick={cancelChanges}>Cancel</button>
+                    <button onClick={cancelProjectChanges}>Cancel</button>
                     <button onClick={deleteProject}>Delete</button>
                 </div>
             </div>
             <div className="editWindow">
                 <div className="modelsPanel">
-                    <text>Доступные объекты</text>
-                    <div className={containerClicked === "cube" ? "modelContainer clicked" : "modelContainer"}
-                        onClick={() => handleContainerClick("cube")}>
+                    <span>Доступные объекты</span>
+                    <div className={selectedModel === "cube" ? "modelContainer clicked" : "modelContainer"}
+                        onClick={() => selectModel("cube")}>
                         <img src="/assets/images/models/cube.png" alt="Куб"></img>
                     </div>
-                    <div className={containerClicked === "sphere" ? "modelContainer clicked" : "modelContainer"}
-                        onClick={() => handleContainerClick("sphere")}>
+                    <div className={selectedModel === "sphere" ? "modelContainer clicked" : "modelContainer"}
+                        onClick={() => selectModel("sphere")}>
                         <img src="/assets/images/models/sphere.png" alt="Сфера"></img>
                     </div>
                 </div>
-                <div className="editableSimulacrum" ref={divRef}></div>
+                <div className="editableSimulacrum" ref={simulacrumContainer}></div>
             </div>
         </>
     )
