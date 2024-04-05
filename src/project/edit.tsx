@@ -12,11 +12,15 @@ export function SimulacrumEditPage() {
 
     const project: Project = location.state
     const [projectName, setProjectName] = useState<string>(project.name)
-
+    const [containerClicked, setContainerClicked] = useState<string | null>(null)
 
     const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setProjectName(event.target.value)
         project.name = event.target.value
+    }
+
+    const handleContainerClick = (container: string) => {
+        setContainerClicked(container === containerClicked ? null : container);
     }
 
     const saveProject = () => {
@@ -77,8 +81,14 @@ export function SimulacrumEditPage() {
             <div className="editWindow">
                 <div className="modelsPanel">
                     <text>Доступные объекты</text>
-                    <div className="modelContainer"> <img src="/assets/images/models/cube.png" alt="Куб"></img> </div>
-                    <div className="modelContainer"> <img src="/assets/images/models/sphere.png" alt="Сфера"></img> </div>
+                    <div className={containerClicked === "cube" ? "modelContainer clicked" : "modelContainer"}
+                        onClick={() => handleContainerClick("cube")}>
+                        <img src="/assets/images/models/cube.png" alt="Куб"></img>
+                    </div>
+                    <div className={containerClicked === "sphere" ? "modelContainer clicked" : "modelContainer"}
+                        onClick={() => handleContainerClick("sphere")}>
+                        <img src="/assets/images/models/sphere.png" alt="Сфера"></img>
+                    </div>
                 </div>
                 <div className="editableSimulacrum" ref={divRef}></div>
             </div>
