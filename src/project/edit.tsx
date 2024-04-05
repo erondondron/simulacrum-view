@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import SimulacrumWindow from './simulacrum'
+import SimulacrumWindow, { SimulacrumObjectType } from './simulacrum'
 import { Project } from '../models'
 import { PROJECTS_URL } from '../urls'
 import { plainToClass } from 'class-transformer'
@@ -14,7 +14,7 @@ export function SimulacrumEditPage() {
     const [simulacrum, setSimulacrum] = useState<SimulacrumWindow | null>(null)
 
     const [projectName, setProjectName] = useState<string>(project.name)
-    const [selectedModel, setSelectedModel] = useState<string | null>(null)
+    const [selectedModel, setSelectedModel] = useState<SimulacrumObjectType | null>(null)
 
     useEffect(() => {
         if (simulacrumContainer.current) {
@@ -31,10 +31,11 @@ export function SimulacrumEditPage() {
         project.name = event.target.value
     }
 
-    const selectModel = (container: string) => {
+    const selectModel = (object: SimulacrumObjectType) => {
+        const toSelect = object === selectedModel ? null : object
         if (simulacrum)
-            simulacrum.draggedObject = container
-        setSelectedModel(container === selectedModel ? null : container);
+            simulacrum.setDraggedObject(toSelect)
+        setSelectedModel(toSelect);
     }
 
     const saveProject = () => {
@@ -87,12 +88,12 @@ export function SimulacrumEditPage() {
             <div className="editWindow">
                 <div className="modelsPanel">
                     <span>Доступные объекты</span>
-                    <div className={selectedModel === "cube" ? "modelContainer clicked" : "modelContainer"}
-                        onClick={() => selectModel("cube")}>
+                    <div className={selectedModel === SimulacrumObjectType.Cube ? "modelContainer clicked" : "modelContainer"}
+                        onClick={() => selectModel(SimulacrumObjectType.Cube)}>
                         <img src="/assets/images/models/cube.png" alt="Куб"></img>
                     </div>
-                    <div className={selectedModel === "sphere" ? "modelContainer clicked" : "modelContainer"}
-                        onClick={() => selectModel("sphere")}>
+                    <div className={selectedModel === SimulacrumObjectType.Sphere ? "modelContainer clicked" : "modelContainer"}
+                        onClick={() => selectModel(SimulacrumObjectType.Sphere)}>
                         <img src="/assets/images/models/sphere.png" alt="Сфера"></img>
                     </div>
                 </div>

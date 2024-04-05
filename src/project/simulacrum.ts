@@ -22,8 +22,14 @@ class Vector3 {
     ) { }
 }
 
-class ObjectStatement {
+export enum SimulacrumObjectType {
+    Sphere = "sphere",
+    Cube = "cube",
+}
+
+class SimulacrumObject {
     id!: number
+    type!: SimulacrumObjectType
 
     @Type(() => Vector3)
     coordinates!: Vector3
@@ -33,8 +39,8 @@ class ObjectStatement {
 }
 
 class SceneStatement {
-    @Type(() => ObjectStatement)
-    objects: Array<ObjectStatement> = []
+    @Type(() => SimulacrumObject)
+    objects: Array<SimulacrumObject> = []
 }
 
 class BufferStatement {
@@ -44,35 +50,61 @@ class BufferStatement {
 class SimulacrumWindow extends GraphicsWindow {
     private eventLoop: Queue<SceneStatement> = new Queue()
     private objects: Record<number, THREE.Object3D> = {}
-    public draggedObject: string | null = null
-    private droppedHook: ((value: string | null) => void) | null = null
+    public draggedObject: THREE.Object3D | null = null
+    private droppedHook: ((value: SimulacrumObjectType | null) => void) | null = null
 
     constructor(container: HTMLDivElement) {
         super(container)
         this.container.addEventListener('click', this.onMouseClicked.bind(this));
+        window.addEventListener('mousemove', this.onMouseMove.bind(this));
     }
 
-    public setDragAndDropHook(updateSelectedObject: (value: string | null) => void) {
+    public setDragAndDropHook(updateSelectedObject: (value: SimulacrumObjectType | null) => void) {
         this.droppedHook = updateSelectedObject
     }
 
-    protected onMouseClicked(event: MouseEvent) {
-        if (this.draggedObject === null)
+    public setDraggedObject(object: SimulacrumObjectType | null) {
+        if (this.draggedObject)
+            this.scene.remove(this.draggedObject)
+        if (!object)
             return
+        this.draggedObject = this.createObject(object)
+        this.draggedObject.position.x = this.camera.left * 2
+        this.draggedObject.position.y = this.camera.top * 2
+        this.scene.add(this.draggedObject)
+    }
+
+    protected onMouseClicked() {
+        if (!this.draggedObject)
+            return
+        const index = Object.keys(this.objects).length
+        this.objects[index] = this.draggedObject
         this.draggedObject = null
         if (this.droppedHook)
             this.droppedHook(null)
     }
 
-    protected addObject(objectInfo: ObjectStatement): void {
+    protected onMouseMove(event: MouseEvent) {
+        if (!this.draggedObject)
+            return
+        const containerX = event.clientX - this.container.offsetLeft
+        const containerY = event.clientY - this.container.offsetTop
 
-        let objectGeometry: THREE.BufferGeometry = new THREE.BoxGeometry(150, 150, 150)
-        let edgeGeometry = new THREE.EdgesGeometry(objectGeometry);
+        this.draggedObject.position.x = this.camera.left + containerX
+        this.draggedObject.position.y = this.camera.top - containerY
+    }
 
-        if (objectInfo.id % 2 === 1) {
-            objectGeometry = new THREE.SphereGeometry(100, 32, 32)
-            edgeGeometry = new THREE.EdgesGeometry(objectGeometry)
+    protected createObject(type: SimulacrumObjectType) {
+        let objectGeometry: THREE.BufferGeometry
+        switch (type) {
+            case SimulacrumObjectType.Cube:
+                objectGeometry = new THREE.BoxGeometry(150, 150, 150)
+                break;
+            default:
+                objectGeometry = new THREE.SphereGeometry(100, 32, 32)
+                break;
         }
+        const edgeGeometry = new THREE.EdgesGeometry(objectGeometry);
 
         const objectMaterial = new THREE.MeshBasicMaterial({ color: 'white' })
         const object = new THREE.Mesh(objectGeometry, objectMaterial)
@@ -80,12 +112,20 @@ class SimulacrumWindow extends GraphicsWindow {
         const edgeMaterial = new THREE.LineBasicMaterial({ color: 'black', linewidth: 100 })
         const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial)
 
-        const group = new THREE.Group();
-        group.add(object);
-        group.add(edges);
+        const group = new THREE.Group()
+        group.add(object)
+        group.add(edges)
+        return group
+    }
 
-        this.objects[objectInfo.id] = group;
-        this.scene.add(group)
+    protected addObject(objectInfo: SimulacrumObject): void {
+        const object = this.createObject(
+            objectInfo.id % 2 === 0
+                ? SimulacrumObjectType.Cube
+                : SimulacrumObjectType.Sphere
+        )
+        this.objects[objectInfo.id] = object;
+        this.scene.add(object)
     }
 
     protected async sceneInit(): Promise<void> {
