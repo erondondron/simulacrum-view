@@ -77,8 +77,8 @@ export function SimulacrumEditPage() {
             <div className="editWindow">
                 <div className="modelsPanel">
                     <text>Доступные объекты</text>
-                    <div> <img src="/assets/images/models/cube.png" alt="Куб"></img> </div>
-                    <div> <img src="/assets/images/models/sphere.png" alt="Сфера"></img> </div>
+                    <div className="modelContainer"> <img src="/assets/images/models/cube.png" alt="Куб"></img> </div>
+                    <div className="modelContainer"> <img src="/assets/images/models/sphere.png" alt="Сфера"></img> </div>
                 </div>
                 <div className="editableSimulacrum" ref={divRef}></div>
             </div>
