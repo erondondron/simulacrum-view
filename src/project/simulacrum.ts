@@ -113,9 +113,9 @@ class SimulacrumWindow extends GraphicsWindow {
             obj.position.y = objInfo.coordinates.y;
             obj.position.z = objInfo.coordinates.z;
 
-            obj.rotation.x = objInfo.rotation.x;
-            obj.rotation.y = objInfo.rotation.y;
-            obj.rotation.z = objInfo.rotation.z;
+            // obj.rotation.x = objInfo.rotation.x;
+            // obj.rotation.y = objInfo.rotation.y;
+            // obj.rotation.z = objInfo.rotation.z;
         }
     }
 }

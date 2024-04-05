@@ -32,13 +32,13 @@ export function SimulacrumEditPage() {
         try {
             const response = await fetch(`${PROJECTS_URL}/${project.uid}`);
             if (!response.ok) {
-                throw new Error('Не удалось получить исходный проект');
+                throw new Error('РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РёСЃС…РѕРґРЅС‹Р№ РїСЂРѕРµРєС‚');
             }
             const json = await response.json();
             const initProject = plainToClass(Project, json);
             navigate(`/${project.uid}`, { state: initProject })
         } catch (error) {
-            console.error('При отмене изменений возникла ошибка: ', error);
+            console.error('РџСЂРё РѕС‚РјРµРЅРµ РёР·РјРµРЅРµРЅРёР№ РІРѕР·РЅРёРєР»Р° РѕС€РёР±РєР°: ', error);
         }
     }
 
@@ -47,7 +47,7 @@ export function SimulacrumEditPage() {
             fetch(`${PROJECTS_URL}/${project.uid}`, { method: 'DELETE' })
             navigate(`/`)
         } catch (error) {
-            console.error('При удалении проекта возникла ошибка: ', error)
+            console.error('РџСЂРё СѓРґР°Р»РµРЅРёРё РїСЂРѕРµРєС‚Р° РІРѕР·РЅРёРєР»Р° РѕС€РёР±РєР°: ', error)
         }
     }
 
@@ -74,7 +74,14 @@ export function SimulacrumEditPage() {
                     <button onClick={deleteProject}>Delete</button>
                 </div>
             </div>
-            <div className="simulacrum" ref={divRef}></div>
+            <div className="editWindow">
+                <div className="modelsPanel">
+                    <text>Р”РѕСЃС‚СѓРїРЅС‹Рµ РѕР±СЉРµРєС‚С‹</text>
+                    <div> <img src="/assets/images/models/cube.png" alt="РљСѓР±"></img> </div>
+                    <div> <img src="/assets/images/models/sphere.png" alt="РЎС„РµСЂР°"></img> </div>
+                </div>
+                <div className="editableSimulacrum" ref={divRef}></div>
+            </div>
         </>
     )
 }
