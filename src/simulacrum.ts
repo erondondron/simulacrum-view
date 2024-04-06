@@ -166,6 +166,7 @@ export class EditableSimulacrumWindow extends SimulacrumWindow {
         super(project)
         this.renderer.domElement.addEventListener('click', this.onMouseClicked.bind(this));
         window.addEventListener('mousemove', this.onMouseMove.bind(this));
+        window.addEventListener('wheel', this.onMouseMove.bind(this));
     }
 
     public setDroppedHook(hook: (value: SimulacrumObjectType | null) => void): void {
@@ -218,13 +219,13 @@ export class EditableSimulacrumWindow extends SimulacrumWindow {
     protected onMouseMove(event: MouseEvent) {
         if (!this.draggedObject)
             return
-        const containerX = event.clientX - this.renderer.domElement.offsetLeft
-        const containerY = event.clientY - this.renderer.domElement.offsetTop
+        const relativeContainerX = event.clientX - this.renderer.domElement.offsetLeft
+        const relativeContainerY = event.clientY - this.renderer.domElement.offsetTop
 
-        const cameraX = this.camera.position.x + this.camera.left
-        const cameraY = this.camera.position.y + this.camera.top
+        const relativeSceneX = (this.camera.left + relativeContainerX) / this.camera.zoom
+        const relativeSceneY = (this.camera.top - relativeContainerY) / this.camera.zoom
 
-        this.draggedObject.position.x = cameraX + containerX
-        this.draggedObject.position.y = cameraY - containerY
+        this.draggedObject.position.x = this.camera.position.x + relativeSceneX
+        this.draggedObject.position.y = this.camera.position.y + relativeSceneY
     }
 }
