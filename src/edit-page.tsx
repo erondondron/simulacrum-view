@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Project, SimulacrumObjectType } from './models'
 import { REST_URL } from './urls'
 import { plainToClass } from 'class-transformer'
-import { EditableSimulacrumWindow } from './simulacrum'
+import { EditableSimulacrumWindow, Object3D } from './simulacrum'
 
 export function SimulacrumEditPage() {
     const navigate = useNavigate()
@@ -14,13 +14,14 @@ export function SimulacrumEditPage() {
     const [simulacrum, setSimulacrum] = useState<EditableSimulacrumWindow | null>(null)
 
     const [projectName, setProjectName] = useState<string>(project.name)
-    const [selectedModel, setSelectedModel] = useState<SimulacrumObjectType | null>(null)
+    const [draggedModel, setDraggedModel] = useState<SimulacrumObjectType | null>(null)
+    const [selectedObject, setSelectedObject] = useState<Object3D | null>(null)
 
     useEffect(() => {
         if (simulacrumContainer.current) {
             const simulacrum = new EditableSimulacrumWindow(project)
             simulacrum.fitToContainer(simulacrumContainer.current)
-            simulacrum.setDroppedHook(setSelectedModel)
+            simulacrum.setDroppedHook(setDraggedModel)
             setSimulacrum(simulacrum)
             simulacrum.animate()
             return
@@ -33,11 +34,13 @@ export function SimulacrumEditPage() {
     }
 
     const onModelSelect = (object: SimulacrumObjectType) => {
-        const toSelect = object === selectedModel ? null : object
-        setSelectedModel(toSelect);
+        const toSelect = object === draggedModel ? null : object
+        setDraggedModel(toSelect);
         if (simulacrum)
             simulacrum.setDraggedObject(toSelect)
     }
+
+    const onObjectParamsChanged = () => { }
 
     const onProjectSave = () => {
         fetch(`${REST_URL}/projects/${project.uid}`, {
@@ -96,16 +99,35 @@ export function SimulacrumEditPage() {
             <div className="editWindow">
                 <div className="modelsPanel">
                     <span>Доступные объекты</span>
-                    <div className={selectedModel === SimulacrumObjectType.Cube ? "modelContainer clicked" : "modelContainer"}
+                    <div className={draggedModel === SimulacrumObjectType.Cube ? "modelContainer clicked" : "modelContainer"}
                         onClick={() => onModelSelect(SimulacrumObjectType.Cube)}>
                         <img src="/assets/images/models/cube.png" alt="Куб"></img>
                     </div>
-                    <div className={selectedModel === SimulacrumObjectType.Sphere ? "modelContainer clicked" : "modelContainer"}
+                    <div className={draggedModel === SimulacrumObjectType.Sphere ? "modelContainer clicked" : "modelContainer"}
                         onClick={() => onModelSelect(SimulacrumObjectType.Sphere)}>
                         <img src="/assets/images/models/sphere.png" alt="Сфера"></img>
                     </div>
                 </div>
                 <div className="editableSimulacrum" ref={simulacrumContainer}></div>
+                <div className="objectPanel">
+                    <h4>Параметры объекта</h4>
+                    <p></p>
+                    <span>В направлении оси x:</span>
+                    <span>Уравнение перемещения (x)</span>
+                    <input
+                        type="text"
+                        value={selectedObject?.instance.position.x}
+                        onChange={onObjectParamsChanged}
+                    />
+                    <p></p>
+                    <span>В направлении оси y:</span>
+                    <span>Уравнение перемещения (y)</span>
+                    <input
+                        type="text"
+                        value={selectedObject?.instance.position.y}
+                        onChange={onObjectParamsChanged}
+                    />
+                </div>
             </div>
         </>
     )

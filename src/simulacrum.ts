@@ -5,7 +5,7 @@ import { plainToClass } from 'class-transformer'
 import { Project, SimulacrumObject, SimulacrumObjectType, SimulacrumState, WebSocketMessage, WSMessageType } from './models'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-class Object3D {
+export class Object3D {
     instance: THREE.Object3D
     bodyGeometry: THREE.BufferGeometry
     bodyMaterial: THREE.MeshBasicMaterial

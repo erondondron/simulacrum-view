@@ -79,6 +79,11 @@ div {
     border: 2px solid white;
     background-color: #1a1a1a;
 }
+.objectPanel {
+    max-width: fit-content;
+    align-items: baseline;
+    margin: 25px;
+}
 
 .controlButtons {
     display: flex;
