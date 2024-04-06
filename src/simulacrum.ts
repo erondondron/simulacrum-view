@@ -156,9 +156,8 @@ class GraphicsWindow {
         this.absPointer.x = this.camera.position.x + sceneX
         this.absPointer.y = this.camera.position.y + sceneY
 
-        // FIXME(erondondron): Неправильно считается при скейлинге или смещении
-        this.relPointer.x = this.absPointer.x / this.camera.right
-        this.relPointer.y = this.absPointer.y / this.camera.top
+        this.relPointer.x = (this.camera.left + containerX) / this.camera.right
+        this.relPointer.y = (this.camera.top - containerY) / this.camera.top
     }
 
     protected onPointerMove(event: MouseEvent): void {
