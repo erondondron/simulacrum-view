@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Project, SimulacrumObjectType } from './models'
+import { Project, SimulacrumObjectType, Vector } from './models'
 import { REST_URL } from './urls'
 import { plainToClass } from 'class-transformer'
 import { EditableSimulacrumWindow, Object3D } from './simulacrum'
@@ -16,12 +16,19 @@ export function SimulacrumEditPage() {
     const [projectName, setProjectName] = useState<string>(project.name)
     const [draggedModel, setDraggedModel] = useState<SimulacrumObjectType | null>(null)
     const [selectedObject, setSelectedObject] = useState<Object3D | null>(null)
+    const [selectedObjectPosition, setSelectedObjectPosition] = useState<Vector | null>(null)
 
     useEffect(() => {
         if (simulacrumContainer.current) {
             const simulacrum = new EditableSimulacrumWindow(project)
             simulacrum.fitToContainer(simulacrumContainer.current)
             simulacrum.setDroppedHook(setDraggedModel)
+            const onSelectHook = (object: Object3D | null): void => {
+                setSelectedObject(object)
+                const position = object ? object.asSimulacrumObject().position : null
+                setSelectedObjectPosition(position)
+            } 
+            simulacrum.setSelectObjectHook(onSelectHook)
             setSimulacrum(simulacrum)
             simulacrum.animate()
             return
@@ -40,7 +47,17 @@ export function SimulacrumEditPage() {
             simulacrum.setDraggedObject(toSelect)
     }
 
-    const onObjectParamsChanged = () => { }
+    const onObjectParamsChanged = (event: React.ChangeEvent<HTMLInputElement>, param: string): void => {
+        if (!selectedObject)
+            return
+        const updates = { [param]: parseFloat(event.target.value || "0") }
+        Object.assign(selectedObject.instance.position, updates)
+        const newPosition = new Vector()
+        if (selectedObjectPosition)
+            Object.assign(newPosition, selectedObjectPosition)
+        Object.assign(newPosition, updates)
+        setSelectedObjectPosition(newPosition)
+    }
 
     const onProjectSave = () => {
         fetch(`${REST_URL}/projects/${project.uid}`, {
@@ -116,16 +133,16 @@ export function SimulacrumEditPage() {
                     <span>Уравнение перемещения (x)</span>
                     <input
                         type="text"
-                        value={selectedObject?.instance.position.x}
-                        onChange={onObjectParamsChanged}
+                        value={selectedObjectPosition?.x}
+                        onChange={(event) => onObjectParamsChanged(event, 'x')}
                     />
                     <p></p>
                     <span>В направлении оси y:</span>
                     <span>Уравнение перемещения (y)</span>
                     <input
                         type="text"
-                        value={selectedObject?.instance.position.y}
-                        onChange={onObjectParamsChanged}
+                        value={selectedObjectPosition?.y}
+                        onChange={(event) => onObjectParamsChanged(event, 'y')}
                     />
                 </div>
             </div>

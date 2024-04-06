@@ -78,8 +78,10 @@ class GraphicsWindow {
     protected raycaster = new THREE.Raycaster();
     protected relPointer: THREE.Vector2 = new THREE.Vector2()
     protected absPointer: THREE.Vector3 = new THREE.Vector3()
+
     protected hoveredObject: Object3D | null = null
     protected selectedObject: Object3D | null = null
+    protected selectObjectHook: ((value: Object3D | null) => void) | null = null
 
     private stepTime: number = 0
     private stepDuration: number = 1000 / 60
@@ -91,7 +93,7 @@ class GraphicsWindow {
 
         window.addEventListener('resize', this.onResizeWindow.bind(this))
         window.addEventListener('mousedown', this.onMouseDown.bind(this))
-        window.addEventListener('mouseup', this.onMouseUp.bind(this))
+        this.renderer.domElement.addEventListener('mouseup', this.onMouseUp.bind(this))
         window.addEventListener('mousemove', this.onPointerMove.bind(this))
         window.addEventListener('wheel', this.onPointerMove.bind(this))
     }
@@ -99,6 +101,10 @@ class GraphicsWindow {
     public fitToContainer(container: HTMLDivElement): void {
         container.appendChild(this.renderer.domElement)
         this.resizeCanvas(container)
+    }
+
+    public setSelectObjectHook(hook: (value: Object3D | null) => void): void {
+        this.selectObjectHook = hook
     }
 
     public animate = (): void => {
@@ -191,6 +197,8 @@ class GraphicsWindow {
         if (this.selectedObject)
             this.selectedObject.bodyMaterial.color.set('white')
         this.selectedObject = this.hoveredObject
+        if (this.selectObjectHook)
+            this.selectObjectHook(this.selectedObject)
     }
 }
 
