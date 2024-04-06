@@ -89,15 +89,15 @@ class GraphicsWindow {
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.setOrbitControls()
 
-        window.addEventListener('mousemove', this.onPointerMove.bind(this));
-        window.addEventListener('wheel', this.onPointerMove.bind(this));
-        window.addEventListener('mousedown', this.onMouseDown.bind(this));
-        window.addEventListener('mouseup', this.onMouseUp.bind(this));
+        window.addEventListener('resize', this.onResizeWindow.bind(this))
+        window.addEventListener('mousedown', this.onMouseDown.bind(this))
+        window.addEventListener('mouseup', this.onMouseUp.bind(this))
+        window.addEventListener('mousemove', this.onPointerMove.bind(this))
+        window.addEventListener('wheel', this.onPointerMove.bind(this))
     }
 
     public fitToContainer(container: HTMLDivElement): void {
         container.appendChild(this.renderer.domElement)
-        container.addEventListener('resize', this.onResizeWindow.bind(this))
         this.resizeCanvas(container)
     }
 
