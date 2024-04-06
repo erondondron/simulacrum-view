@@ -62,6 +62,12 @@ class Object3D {
     }
 }
 
+enum MouseButton {
+    Left,
+    Wheel,
+    Right,
+}
+
 class GraphicsWindow {
     protected camera: THREE.OrthographicCamera = new THREE.OrthographicCamera()
     protected renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer({ antialias: true })
@@ -85,6 +91,8 @@ class GraphicsWindow {
 
         window.addEventListener('mousemove', this.onPointerMove.bind(this));
         window.addEventListener('wheel', this.onPointerMove.bind(this));
+        window.addEventListener('mousedown', this.onMouseDown.bind(this));
+        window.addEventListener('mouseup', this.onMouseUp.bind(this));
     }
 
     public fitToContainer(container: HTMLDivElement): void {
@@ -106,16 +114,22 @@ class GraphicsWindow {
 
     protected hoverObject(): void {
         this.raycaster.setFromCamera(this.relPointer, this.camera);
-        if (this.hoveredObject) {
-            this.hoveredObject.bodyMaterial.color.set("white")
-            this.hoveredObject = null
-        }
+        let currentHoveredObject = null
         for (const obj of Object.values(this.objects)) {
             const intersection = this.raycaster.intersectObject(obj.instance);
             if (intersection.length === 0) continue
-            obj.bodyMaterial.color.set('#f00');
-            this.hoveredObject = obj
+            currentHoveredObject = obj
             break
+        }
+        if (this.hoveredObject && this.hoveredObject !== currentHoveredObject) {
+            if (this.hoveredObject !== this.selectedObject)
+                this.hoveredObject.bodyMaterial.color.set("white")
+            this.hoveredObject = null
+        }
+        if (!this.hoveredObject && currentHoveredObject) {
+            this.hoveredObject = currentHoveredObject
+            if (this.hoveredObject !== this.selectedObject)
+                this.hoveredObject.bodyMaterial.color.set('#c8a2c8');
         }
     }
 
@@ -163,6 +177,20 @@ class GraphicsWindow {
     protected onPointerMove(event: MouseEvent): void {
         this.setPointerPosition(event)
         this.hoverObject()
+    }
+
+    protected onMouseDown(event: MouseEvent): void {
+        if (event.button !== MouseButton.Left || !this.hoveredObject)
+            return
+        this.hoveredObject.bodyMaterial.color.set('#7851a9')
+    }
+
+    protected onMouseUp(event: MouseEvent): void {
+        if (event.button !== MouseButton.Left || !this.hoveredObject)
+            return
+        if (this.selectedObject)
+            this.selectedObject.bodyMaterial.color.set('white')
+        this.selectedObject = this.hoveredObject
     }
 }
 
