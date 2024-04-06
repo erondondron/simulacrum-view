@@ -186,7 +186,7 @@ class GraphicsWindow {
     }
 
     protected onMouseUp(event: MouseEvent): void {
-        if (event.button !== MouseButton.Left || !this.hoveredObject)
+        if (event.button !== MouseButton.Left)
             return
         if (this.selectedObject)
             this.selectedObject.bodyMaterial.color.set('white')
