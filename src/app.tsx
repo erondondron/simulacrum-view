@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
-import { SimulacrumViewPage } from './project/view'
-import { SimulacrumEditPage } from './project/edit'
+import { SimulacrumViewPage } from './view-page'
+import { SimulacrumEditPage } from './edit-page'
 import { plainToClass } from 'class-transformer'
-import { PROJECTS_URL } from './urls'
 import { Project } from './models'
+import { REST_URL } from './urls'
 
 function HomePage() {
     const navigate = useNavigate();
@@ -12,7 +12,7 @@ function HomePage() {
 
     const createNewProject = async () => {
         try {
-            const response = await fetch(PROJECTS_URL, { method: 'POST' });
+            const response = await fetch(`${REST_URL}/projects`, { method: 'POST' });
             if (!response.ok) {
                 throw new Error('Не удалось создать проект');
             }
@@ -27,7 +27,7 @@ function HomePage() {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const response = await fetch(PROJECTS_URL)
+                const response = await fetch(`${REST_URL}/projects`)
                 if (!response.ok) {
                     throw new Error('Не удалось получить список проектов')
                 }

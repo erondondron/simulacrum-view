@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import SimulacrumWindow, { SimulacrumObjectType } from './simulacrum'
-import { Project } from '../models'
-import { PROJECTS_URL } from '../urls'
+import { Project, SimulacrumObjectType } from './models'
+import { REST_URL } from './urls'
 import { plainToClass } from 'class-transformer'
+import { EditableSimulacrumWindow } from './simulacrum'
 
 export function SimulacrumEditPage() {
     const navigate = useNavigate()
@@ -11,45 +11,53 @@ export function SimulacrumEditPage() {
     const project: Project = location.state
 
     const simulacrumContainer = useRef<HTMLDivElement>(null)
-    const [simulacrum, setSimulacrum] = useState<SimulacrumWindow | null>(null)
+    const [simulacrum, setSimulacrum] = useState<EditableSimulacrumWindow | null>(null)
 
     const [projectName, setProjectName] = useState<string>(project.name)
     const [selectedModel, setSelectedModel] = useState<SimulacrumObjectType | null>(null)
 
     useEffect(() => {
         if (simulacrumContainer.current) {
-            const newSimulacrum = new SimulacrumWindow(simulacrumContainer.current)
-            newSimulacrum.setDragAndDropHook(setSelectedModel)
-            setSimulacrum(newSimulacrum)
-            newSimulacrum.animate()
-            return () => { newSimulacrum.cleanup(); }
+            const simulacrum = new EditableSimulacrumWindow(project)
+            simulacrum.fitToContainer(simulacrumContainer.current)
+            simulacrum.setDroppedHook(setSelectedModel)
+            setSimulacrum(simulacrum)
+            simulacrum.animate()
+            return
         }
-    }, [])
+    }, [project])
 
-    const editProjectName = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const onProjectNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setProjectName(event.target.value)
         project.name = event.target.value
     }
 
-    const selectModel = (object: SimulacrumObjectType) => {
+    const onModelSelect = (object: SimulacrumObjectType) => {
         const toSelect = object === selectedModel ? null : object
+        setSelectedModel(toSelect);
         if (simulacrum)
             simulacrum.setDraggedObject(toSelect)
-        setSelectedModel(toSelect);
     }
 
-    const saveProject = () => {
-        fetch(`${PROJECTS_URL}/${project.uid}`, {
+    const onProjectSave = () => {
+        fetch(`${REST_URL}/projects/${project.uid}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(project),
         })
+        if (simulacrum) {
+            fetch(`${REST_URL}/projects/${project.uid}/objects`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(simulacrum.getState()),
+            })
+        }
         navigate(`/${project.uid}`, { state: project })
     }
 
-    const cancelProjectChanges = async () => {
+    const onProjectChangesCancel = async () => {
         try {
-            const response = await fetch(`${PROJECTS_URL}/${project.uid}`);
+            const response = await fetch(`${REST_URL}/projects/${project.uid}`);
             if (!response.ok) {
                 throw new Error('Не удалось получить исходный проект');
             }
@@ -63,7 +71,7 @@ export function SimulacrumEditPage() {
 
     const deleteProject = async () => {
         try {
-            fetch(`${PROJECTS_URL}/${project.uid}`, { method: 'DELETE' })
+            fetch(`${REST_URL}/projects/${project.uid}`, { method: 'DELETE' })
             navigate(`/`)
         } catch (error) {
             console.error('При удалении проекта возникла ошибка: ', error)
@@ -77,11 +85,11 @@ export function SimulacrumEditPage() {
                     className="editableProjectName"
                     type="text"
                     value={projectName}
-                    onChange={editProjectName}
+                    onChange={onProjectNameChange}
                 />
                 <div className="controlButtons">
-                    <button onClick={saveProject}>Save</button>
-                    <button onClick={cancelProjectChanges}>Cancel</button>
+                    <button onClick={onProjectSave}>Save</button>
+                    <button onClick={onProjectChangesCancel}>Cancel</button>
                     <button onClick={deleteProject}>Delete</button>
                 </div>
             </div>
@@ -89,11 +97,11 @@ export function SimulacrumEditPage() {
                 <div className="modelsPanel">
                     <span>Доступные объекты</span>
                     <div className={selectedModel === SimulacrumObjectType.Cube ? "modelContainer clicked" : "modelContainer"}
-                        onClick={() => selectModel(SimulacrumObjectType.Cube)}>
+                        onClick={() => onModelSelect(SimulacrumObjectType.Cube)}>
                         <img src="/assets/images/models/cube.png" alt="Куб"></img>
                     </div>
                     <div className={selectedModel === SimulacrumObjectType.Sphere ? "modelContainer clicked" : "modelContainer"}
-                        onClick={() => selectModel(SimulacrumObjectType.Sphere)}>
+                        onClick={() => onModelSelect(SimulacrumObjectType.Sphere)}>
                         <img src="/assets/images/models/sphere.png" alt="Сфера"></img>
                     </div>
                 </div>
