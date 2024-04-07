@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Project, Queue, SimulacrumObject, SimulacrumObjectType, SimulacrumState } from '../../data/models'
+import { Project, Queue, ObjectInfo, ObjectType, SimulacrumState } from '../../data/models'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { CanvasObject, MouseButton } from './models'
 
@@ -13,7 +13,7 @@ import { CanvasObject, MouseButton } from './models'
  * @param orbitControls - Контроль положения камеры с помощью мыши
  * 
  * @param scene - Пространство, в котором размещаются объекты
- * @param objects - Словарь объектов сцены по их id
+ * @param objects - Словарь объектов сцены по их uid
  * 
  * @param raycaster - Занимается расчётом пересечений лучей и объектов. Полезен при наведении указателя мыши на объкты
  * @param absPointer - Положение указателя мыши в абсолютных координатах сцены
@@ -36,7 +36,7 @@ export class SimulacrumCanvas {
     protected orbitControls: OrbitControls = new OrbitControls(this.camera, this.renderer.domElement)
 
     protected scene: THREE.Scene = new THREE.Scene()
-    protected objects: Record<number, CanvasObject> = {}
+    protected objects: Record<string, CanvasObject> = {}
 
     protected raycaster = new THREE.Raycaster();
     protected relPointer: THREE.Vector2 = new THREE.Vector2()
@@ -57,14 +57,24 @@ export class SimulacrumCanvas {
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.setOrbitControls()
         this.registerEvents()
-        // TODO(erondondron): Камеру нужно настраивать после добавления объектов
         this.fitCameraPosition()
         this.animate()
+    }
+
+    public addObject(info: ObjectInfo): void {
+        const object = new CanvasObject(info)
+        this.scene.add(object.instance)
+        this.objects[object.uid] = object
     }
 
     public fitToContainer(container: HTMLDivElement): void {
         container.appendChild(this.renderer.domElement)
         this.resizeCanvas(container)
+    }
+
+    public fitCameraPosition(): void {
+        // TODO(smirnovas): Нужно менять глубину в зависимости от максимального z + размер объекта
+        this.camera.position.z = 2000
     }
 
     protected animate = (): void => {
@@ -84,8 +94,10 @@ export class SimulacrumCanvas {
 
         const statement = this.eventLoop.dequeue()
         for (const objInfo of statement.objects) {
-            const obj = this.objects[objInfo.id]
-            if (obj) obj.setObjectPosition(objInfo)
+            if (objInfo.uid) {
+                const object = this.objects[objInfo.uid]
+                object.setObjectPosition(objInfo)
+            }
         }
     }
 
@@ -103,11 +115,6 @@ export class SimulacrumCanvas {
             RIGHT: THREE.MOUSE.PAN,
             LEFT: null,
         }
-    }
-
-    protected fitCameraPosition(): void {
-        // TODO(smirnovas): Нужно менять глубину в зависимости от максимального z + размер объекта
-        this.camera.position.z = 2000
     }
 
     protected onResizeWindow(event: UIEvent): void {
@@ -186,23 +193,23 @@ export class SimulacrumCanvas {
 
 export class EditableSimulacrumWindow extends SimulacrumCanvas {
     protected draggedObject: CanvasObject | null = null
-    protected droppedHook: ((value: SimulacrumObjectType | null) => void) | null = null
+    protected droppedHook: ((value: ObjectType | null) => void) | null = null
 
     constructor(project: Project) {
         super(project)
         this.renderer.domElement.addEventListener('click', this.onMouseClicked.bind(this));
     }
 
-    public setDroppedHook(hook: (value: SimulacrumObjectType | null) => void): void {
+    public setDroppedHook(hook: (value: ObjectType | null) => void): void {
         this.droppedHook = hook
     }
 
-    public setDraggedObject(type: SimulacrumObjectType | null) {
+    public setDraggedObject(type: ObjectType | null) {
         if (this.draggedObject)
             this.scene.remove(this.draggedObject.instance)
         if (!type)
             return
-        const info = new SimulacrumObject()
+        const info = new ObjectInfo()
         info.type = type
         info.position.x = this.camera.left * 2
         info.position.y = this.camera.top * 2
@@ -216,12 +223,12 @@ export class EditableSimulacrumWindow extends SimulacrumCanvas {
         return state
     }
 
-    protected getObjectState(object: THREE.Object3D): SimulacrumObject {
-        const state = new SimulacrumObject()
+    protected getObjectState(object: THREE.Object3D): ObjectInfo {
+        const state = new ObjectInfo()
         state.id = object.id
         const mesh = object.children[0]
         const isCube = mesh instanceof THREE.Mesh && mesh.geometry instanceof THREE.BoxGeometry
-        state.type = isCube ? SimulacrumObjectType.Cube : SimulacrumObjectType.Sphere
+        state.type = isCube ? ObjectType.Cube : ObjectType.Sphere
         state.position.x = object.position.x
         state.position.y = object.position.y
         state.position.z = object.position.z

@@ -1,5 +1,5 @@
 import { plainToClass } from "class-transformer"
-import { Project } from "./models"
+import { Project, SimulacrumState } from "./models"
 
 const REST_URL = 'http://localhost:8000/api'
 const WS_URL = 'ws://localhost:8000/api'
@@ -34,9 +34,9 @@ export async function createNewProject(): Promise<Project> {
     )
 }
 
-export async function fetchProject(uuid: string): Promise<Project> {
+export async function fetchProject(uid: string): Promise<Project> {
     return (
-        fetch(`${REST_URL}/projects/${uuid}`)
+        fetch(`${REST_URL}/projects/${uid}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Не удалось получить проект")
@@ -45,6 +45,21 @@ export async function fetchProject(uuid: string): Promise<Project> {
             })
             .then(json => {
                 return plainToClass(Project, json)
+            })
+    )
+}
+
+export async function fetchProjectObjects(project_uid: string): Promise<SimulacrumState> {
+    return (
+        fetch(`${REST_URL}/projects/${project_uid}/objects`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Не удалось получить список объектов для проекта")
+                }
+                return response.json() as Promise<Record<string, unknown>>
+            })
+            .then(stateJson => {
+                return plainToClass(SimulacrumState, stateJson)
             })
     )
 }
@@ -64,19 +79,4 @@ export async function fetchProject(uuid: string): Promise<Project> {
                 this.eventLoop.enqueue(state)
             }
         }
-    }
-
-    protected fetchProjectInitState(): void {
-        fetch(`${REST_URL}/projects/${this.project.uid}/objects`)
-            .then(response => response.json())
-            .then(stateJson => {
-                const state = plainToClass(SimulacrumState, stateJson)
-                for (const objInfo of state.objects) {
-                    const object = new CanvasObject(objInfo)
-                    this.scene.add(object.instance)
-                    this.objects[objInfo.id] = object
-                }
-                this.eventLoop.enqueue(state)
-                this.applayStepChanges()
-            })
     }*/

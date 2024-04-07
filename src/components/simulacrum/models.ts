@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { SimulacrumObject, SimulacrumObjectType } from '../../data/models';
+import { ObjectInfo, ObjectType } from '../../data/models';
 
 export enum MouseButton {
     Left,
@@ -8,6 +8,7 @@ export enum MouseButton {
 }
 
 export class CanvasObject {
+    uid: string
     instance: THREE.Object3D;
     bodyGeometry: THREE.BufferGeometry;
     bodyMaterial: THREE.MeshBasicMaterial;
@@ -16,9 +17,9 @@ export class CanvasObject {
     edgesMaterial: THREE.LineBasicMaterial;
     edges: THREE.LineSegments;
 
-    constructor(info: SimulacrumObject) {
+    constructor(info: ObjectInfo) {
         switch (info.type) {
-            case SimulacrumObjectType.Cube:
+            case ObjectType.Cube:
                 this.bodyGeometry = new THREE.BoxGeometry(50, 50, 50);
                 break;
             default:
@@ -37,10 +38,12 @@ export class CanvasObject {
         this.instance.add(this.body);
         this.instance.add(this.edges);
 
+        this.uid = info.uid ? info.uid : this.instance.uuid
+
         this.setObjectPosition(info);
     }
 
-    public setObjectPosition(info: SimulacrumObject) {
+    public setObjectPosition(info: ObjectInfo) {
         this.instance.position.x = info.position.x;
         this.instance.position.y = info.position.y;
         this.instance.position.z = info.position.z;
@@ -49,11 +52,11 @@ export class CanvasObject {
         this.instance.rotation.z = info.rotation.z;
     }
 
-    public asSimulacrumObject(): SimulacrumObject {
-        const state = new SimulacrumObject();
+    public asSimulacrumObject(): ObjectInfo {
+        const state = new ObjectInfo();
         state.id = this.instance.id;
         const isCube = this.bodyGeometry instanceof THREE.BoxGeometry;
-        state.type = isCube ? SimulacrumObjectType.Cube : SimulacrumObjectType.Sphere;
+        state.type = isCube ? ObjectType.Cube : ObjectType.Sphere;
         state.position.x = this.instance.position.x;
         state.position.y = this.instance.position.y;
         state.position.z = this.instance.position.z;

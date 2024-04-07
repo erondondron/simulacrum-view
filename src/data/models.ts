@@ -46,13 +46,13 @@ export class Project {
 }
 
 export class SimulacrumState {
-    @Type(() => SimulacrumObject)
-    objects: Array<SimulacrumObject> = []
+    @Type(() => ObjectInfo)
+    objects: Array<ObjectInfo> = []
 }
 
-export class SimulacrumObject {
-    id!: number
-    type!: SimulacrumObjectType
+export class ObjectInfo {
+    uid?: string
+    type!: ObjectType
 
     @Type(() => Vector)
     position: Vector = new Vector()
@@ -61,7 +61,7 @@ export class SimulacrumObject {
     rotation: Vector = new Vector()
 }
 
-export enum SimulacrumObjectType {
+export enum ObjectType {
     Sphere = "sphere",
     Cube = "cube",
 }
