@@ -9,6 +9,9 @@ export enum MouseButton {
 
 export class CanvasObject {
     uid: string
+    isHovered: boolean
+    isSelected: boolean
+
     instance: THREE.Object3D;
     bodyGeometry: THREE.BufferGeometry;
     bodyMaterial: THREE.MeshBasicMaterial;
@@ -39,7 +42,8 @@ export class CanvasObject {
         this.instance.add(this.edges);
 
         this.uid = info.uid ? info.uid : this.instance.uuid
-
+        this.isHovered = false
+        this.isSelected = false
         this.setObjectPosition(info);
     }
 
@@ -52,9 +56,9 @@ export class CanvasObject {
         this.instance.rotation.z = info.rotation.z;
     }
 
-    public asSimulacrumObject(): ObjectInfo {
+    public getInfo(): ObjectInfo {
         const state = new ObjectInfo();
-        state.id = this.instance.id;
+        state.uid = this.instance.uuid;
         const isCube = this.bodyGeometry instanceof THREE.BoxGeometry;
         state.type = isCube ? ObjectType.Cube : ObjectType.Sphere;
         state.position.x = this.instance.position.x;
@@ -64,5 +68,32 @@ export class CanvasObject {
         state.rotation.y = this.instance.rotation.y;
         state.rotation.z = this.instance.rotation.z;
         return state;
+    }
+
+    public hover() {
+        if (this.isHovered) return
+        this.isHovered = true
+        if (!this.isSelected)
+            this.bodyMaterial.color.set('#c8a2c8')
+    }
+
+    public unhover() {
+        this.isHovered = false
+        if (!this.isSelected)
+            this.bodyMaterial.color.set('white')
+    }
+
+    public preselect() {
+        this.bodyMaterial.color.set('#7851a9')
+    }
+
+    public select() {
+        this.isSelected = true
+        this.bodyMaterial.color.set('#7851a9')
+    }
+
+    public unselect() {
+        this.isSelected = false
+        this.bodyMaterial.color.set('white')
     }
 }

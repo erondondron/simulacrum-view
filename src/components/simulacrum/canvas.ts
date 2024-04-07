@@ -128,17 +128,18 @@ export class SimulacrumCanvas {
     }
 
     protected onMouseDown(event: MouseEvent): void {
-        if (event.button !== MouseButton.Left || !this.hoveredObject)
+        if (event.button !== MouseButton.Left)
             return
-        this.hoveredObject.bodyMaterial.color.set('#7851a9')
+        this.selectedObject?.unselect()
+        this.hoveredObject?.preselect()
     }
 
     protected onMouseUp(event: MouseEvent): void {
         if (event.button !== MouseButton.Left)
             return
-        if (this.selectedObject)
-            this.selectedObject.bodyMaterial.color.set('white')
+        this.selectedObject?.unselect()
         this.selectedObject = this.hoveredObject
+        this.selectedObject?.select()
         if (this.onSelectObjectHook)
             this.onSelectObjectHook(this.selectedObject)
     }
@@ -178,16 +179,10 @@ export class SimulacrumCanvas {
             currentHoveredObject = obj
             break
         }
-        if (this.hoveredObject && this.hoveredObject !== currentHoveredObject) {
-            if (this.hoveredObject !== this.selectedObject)
-                this.hoveredObject.bodyMaterial.color.set("white")
-            this.hoveredObject = null
-        }
-        if (!this.hoveredObject && currentHoveredObject) {
-            this.hoveredObject = currentHoveredObject
-            if (this.hoveredObject !== this.selectedObject)
-                this.hoveredObject.bodyMaterial.color.set('#c8a2c8');
-        }
+        if (this.hoveredObject !== currentHoveredObject)
+            this.hoveredObject?.unhover()
+        this.hoveredObject = currentHoveredObject
+        this.hoveredObject?.hover()
     }
 }
 
@@ -219,7 +214,7 @@ export class EditableSimulacrumWindow extends SimulacrumCanvas {
 
     public getState(): SimulacrumState {
         const state = new SimulacrumState()
-        state.objects = Object.values(this.objects).map(item => item.asSimulacrumObject())
+        state.objects = Object.values(this.objects).map(item => itemgetInfot())
         return state
     }
 
