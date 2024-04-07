@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { SimulacrumEditPage } from './edit-page'
 import { HomePage } from './components/home-page'
 import { VeiwPage } from './components/veiw-page'
+import { EditPage } from './components/edit-page'
 
 export function App() {
     return (
@@ -9,7 +9,7 @@ export function App() {
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/projects/:uuid" element={<VeiwPage />} />
-                <Route path="/:uuid/edit" element={<SimulacrumEditPage />} />
+                <Route path="/projects/:uuid/edit" element={<EditPage />} />
             </Routes>
         </Router>
     )

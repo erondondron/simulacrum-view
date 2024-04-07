@@ -11,7 +11,7 @@ enum HomePageButton {
 }
 
 function HomePageControlPanel({ handlers = {} }: {
-    handlers: Partial<Record<HomePageButton, () => void>>
+    handlers?: Partial<Record<HomePageButton, () => void>>
 }) {
     const defaultHandler = () => { }
 
@@ -79,7 +79,6 @@ const ProjectsNavigation = forwardRef<ProjectNavigationRef, unknown>((_, ref) =>
         </div>
     )
 })
-
 
 export function HomePage() {
     const projectNavigation = useRef<ProjectNavigationRef>(null)

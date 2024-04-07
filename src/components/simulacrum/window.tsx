@@ -19,6 +19,10 @@ export function SimulacrumWindow({ project }: { project: Project | null }) {
         setSimulacrum(newSimulacrum)
     }
 
+    const saveSimulacrum = async () => {
+        // Объекты из simulacrum конвертируются в json и отправляются в бэкенд
+    }
+
     useEffect(() => {if (project) createSimulacrum(project)}, [project])
 
     return <div className= "simulacrumWindow" ref = { container } > </div>
