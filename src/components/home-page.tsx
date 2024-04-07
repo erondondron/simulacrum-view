@@ -25,9 +25,15 @@ function HomePageControlPanel() {
     return (
         <ControlPanel
             buttons={[
-                <button key="newProjectButton" onClick={createNewProject}>New</button>,
-                <button key="settingsButton">Settings</button>,
-                <button key="infoButton">Info</button>,
+                <button key="newProjectButton" onClick={createNewProject}>
+                    <img src="assets/images/icons/plus-white.png" alt="Новый проект" />
+                </button>,
+                <button key="settingsButton">
+                    <img src="assets/images/icons/gear-white.png" alt="Новый проект" />
+                </button>,
+                <button key="infoButton">
+                    <img src="assets/images/icons/info-white.png" alt="Новый проект" />
+                </button>,
             ]}
         />
     )
@@ -51,7 +57,7 @@ function ProjectsNavigation() {
             })
     }
 
-    useEffect(() => { fetchProjects() }, [])
+    useEffect(() => { fetchProjects() })
 
     return (
         <div>

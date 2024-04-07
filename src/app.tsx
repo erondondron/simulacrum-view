@@ -12,5 +12,5 @@ export function App() {
                 <Route path="/:uuid/edit" element={<SimulacrumEditPage />} />
             </Routes>
         </Router>
-    );
+    )
 }
