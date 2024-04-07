@@ -28,10 +28,10 @@ html, body {
 div {
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: start;
+    align-items: center;
     flex-grow: 1;
-    max-height: 100%;
+    height: 100%;
     width: 100%;
 }
 
@@ -121,9 +121,9 @@ div {
 }
 
 h1 {
-    font-size: 3.2em;
+    font-size: 2em;
     line-height: 1.1;
-    margin-top: 0;
+    margin: 0;
 }
 
 button {
@@ -151,7 +151,7 @@ img {
     max-width: 80%;
 }
 
-/* Íàñòðîêà ñâåòëîé òåìû */
+/* ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ° ÑÐ²ÐµÑ‚Ð»Ð¾Ð¹ Ñ‚ÐµÐ¼Ñ‹ */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -163,4 +163,24 @@ img {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.pageHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+    height: min-content;
+    width: 60%;
+}
+.pageHeader > img {
+    padding: 0;
+    padding-right: 2em;
+}
+.controlPanel {
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    padding: 5px;
+    gap: 5px;
 }
