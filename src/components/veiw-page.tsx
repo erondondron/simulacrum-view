@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ControlPanel, MainWindow, PageHeader } from './main-window'
 import { Project } from '../data/models'
-import { SimulacrumWindow } from './simulacrum-window'
+import { SimulacrumWindow } from './simulacrum/window'
 import { fetchProject } from '../data/requests'
 
 

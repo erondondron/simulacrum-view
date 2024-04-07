@@ -1,16 +1,15 @@
 import { useEffect, useRef } from 'react'
-import { Simulacrum } from '../simulacrum'
-import { Project } from '../data/models'
+import { Project } from '../../data/models'
+import { SimulacrumCanvas } from './canvas'
 
 export function SimulacrumWindow({ project }: { project: Project | null }) {
     const container = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         if (!container.current || !project) return
-        const simulacrum = new Simulacrum(project)
+        const simulacrum = new SimulacrumCanvas()
         simulacrum.fitToContainer(container.current)
         // simulacrum.runCalculations()
-        simulacrum.animate()
         return
     }, [project])
 
