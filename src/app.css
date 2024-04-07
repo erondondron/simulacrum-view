@@ -165,6 +165,7 @@ img {
   }
 }
 
+/* Настройки MainWindow */
 .pageHeader {
     display: flex;
     flex-direction: row;
@@ -191,4 +192,9 @@ img {
 .controlPanel > button > img {
     padding: 7px;
     max-height: calc(100% - 14px);
+}
+
+/* Настройки ViewPage */
+.simulacrumWindow{
+    overflow: hidden;
 }

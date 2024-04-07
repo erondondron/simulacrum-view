@@ -4,6 +4,7 @@ import { ControlPanel, MainWindow, PageHeader } from './main-window'
 import { REST_URL } from '../urls'
 import { plainToClass } from 'class-transformer'
 import { Project } from '../models'
+import { SimulacrumWindow } from './simulacrum-window'
 
 
 function ViewPageControlPanel({ project }: { project: Project | null }) {
@@ -47,11 +48,11 @@ export function VeiwPage() {
         <MainWindow
             header={
                 <PageHeader
-                    title={<h1>{ project?.name}</h1>}
-                    controls={<ViewPageControlPanel project={ project } />}
+                    title={<h1>{project?.name}</h1>}
+                    controls={<ViewPageControlPanel project={project} />}
                 />
             }
-            body={<div></div>}
+            body={<SimulacrumWindow project={ project } />}
         />
     )
 }

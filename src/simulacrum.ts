@@ -202,7 +202,7 @@ class GraphicsWindow {
     }
 }
 
-export class SimulacrumWindow extends GraphicsWindow {
+export class Simulacrum extends GraphicsWindow {
     protected eventLoop: Queue<SimulacrumState> = new Queue()
 
     constructor(protected project: Project) {
@@ -260,7 +260,7 @@ export class SimulacrumWindow extends GraphicsWindow {
     }
 }
 
-export class EditableSimulacrumWindow extends SimulacrumWindow {
+export class EditableSimulacrumWindow extends Simulacrum {
     protected draggedObject: Object3D | null = null
     protected droppedHook: ((value: SimulacrumObjectType | null) => void) | null = null
 
