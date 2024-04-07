@@ -26,13 +26,13 @@ function HomePageControlPanel() {
         <ControlPanel
             buttons={[
                 <button key="newProjectButton" onClick={createNewProject}>
-                    <img src="assets/images/icons/plus-white.png" alt="Новый проект" />
+                    <img src="/assets/images/icons/plus-white.png" alt="Новый проект" />
                 </button>,
                 <button key="settingsButton">
-                    <img src="assets/images/icons/gear-white.png" alt="Новый проект" />
+                    <img src="/assets/images/icons/gear-white.png" alt="Новый проект" />
                 </button>,
                 <button key="infoButton">
-                    <img src="assets/images/icons/info-white.png" alt="Новый проект" />
+                    <img src="/assets/images/icons/info-white.png" alt="Новый проект" />
                 </button>,
             ]}
         />
@@ -64,7 +64,7 @@ function ProjectsNavigation() {
             <h2>Доступные проекты:</h2>
             <ul>
                 {projects.map(project => (
-                    <li key={project.uid} onClick={() => navigate(`/${project.uid}`, { state: project })}>
+                    <li key={project.uid} onClick={() => navigate(`/projects/${project.uid}`, { state: project })}>
                         {project.name}
                     </li>
                 ))}
