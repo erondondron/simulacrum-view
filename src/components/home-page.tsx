@@ -1,31 +1,21 @@
 import { useNavigate } from "react-router-dom"
 import { ControlPanel, PageHeader, MainWindow } from "./main-window"
-import { REST_URL } from "../urls"
-import { plainToClass } from "class-transformer"
-import { Project } from "../models"
+import { Project } from "../data/models"
 import { useEffect, useState } from "react"
+import { createNewProject, fetchProjects } from "../data/requests"
 
 function HomePageControlPanel() {
     const navigate = useNavigate()
 
-    const createNewProject = async () => {
-        fetch(`${REST_URL}/projects`, { method: "POST" })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Не удалось создать проект")
-                }
-                return response.json()
-            })
-            .then(json => {
-                const project = plainToClass(Project, json)
-                navigate(`/${project.uid}/edit`, { state: project })
-            })
+    const onProjectCreate = async () => {
+        const project = await createNewProject()
+        navigate(`/projects/${project.uid}/edit`, { state: project })
     }
 
     return (
         <ControlPanel
             buttons={[
-                <button key="newProjectButton" onClick={createNewProject}>
+                <button key="newProjectButton" onClick={onProjectCreate}>
                     <img src="/assets/images/icons/plus-white.png" alt="Новый проект" />
                 </button>,
                 <button key="settingsButton">
@@ -43,21 +33,12 @@ function ProjectsNavigation() {
     const navigate = useNavigate()
     const [projects, setProjects] = useState<Project[]>([])
 
-    const fetchProjects = async () => {
-        fetch(`${REST_URL}/projects`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Не удалось получить список проектов")
-                }
-                return response.json() as Promise<Record<string, unknown>[]>
-            })
-            .then(json => {
-                const projects = json.map(item => plainToClass(Project, item))
-                setProjects(projects)
-            })
+    const onProjectsUpdate = async () => {
+        const newProjects = await fetchProjects()
+        setProjects(newProjects)
     }
 
-    useEffect(() => { fetchProjects() })
+    useEffect(() => { onProjectsUpdate() })
 
     return (
         <div>

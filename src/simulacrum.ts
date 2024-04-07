@@ -1,8 +1,6 @@
 import * as THREE from 'three'
-import Queue from './queue'
-import { REST_URL, WS_URL } from './urls'
 import { plainToClass } from 'class-transformer'
-import { Project, SimulacrumObject, SimulacrumObjectType, SimulacrumState, WebSocketMessage, WSMessageType } from './models'
+import { Project, Queue, SimulacrumObject, SimulacrumObjectType, SimulacrumState, WebSocketMessage, WSMessageType } from './data/models'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 export class Object3D {

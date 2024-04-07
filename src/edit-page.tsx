@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Project, SimulacrumObjectType, Vector } from './models'
-import { REST_URL } from './urls'
+import { Project, SimulacrumObjectType, Vector } from './data/models'
 import { plainToClass } from 'class-transformer'
 import { EditableSimulacrumWindow, Object3D } from './simulacrum'
 

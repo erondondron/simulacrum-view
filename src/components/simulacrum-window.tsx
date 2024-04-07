@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Simulacrum } from '../simulacrum'
-import { Project } from '../models'
+import { Project } from '../data/models'
 
 export function SimulacrumWindow({ project }: { project: Project | null }) {
     const container = useRef<HTMLDivElement>(null)

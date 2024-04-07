@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ControlPanel, MainWindow, PageHeader } from './main-window'
-import { REST_URL } from '../urls'
-import { plainToClass } from 'class-transformer'
-import { Project } from '../models'
+import { Project } from '../data/models'
 import { SimulacrumWindow } from './simulacrum-window'
+import { fetchProject } from '../data/requests'
 
 
 function ViewPageControlPanel({ project }: { project: Project | null }) {
@@ -28,21 +27,13 @@ export function VeiwPage() {
     const { uuid } = useParams()
     const [project, setProject] = useState<Project | null>(useLocation().state)
 
-    const fetchProject = async () => {
-        fetch(`${REST_URL}/projects/${uuid}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Не удалось получить проект")
-                }
-                return response.json() as Promise<Record<string, unknown>>
-            })
-            .then(json => {
-                const project = plainToClass(Project, json)
-                setProject(project)
-            })
+    const onProjectUpdate = async () => {
+        if (project || !uuid) return
+        const projectUpdate = await fetchProject(uuid)
+        setProject(projectUpdate)
     }
 
-    useEffect(() => { if (!project) fetchProject() })
+    useEffect(() => { onProjectUpdate() })
 
     return (
         <MainWindow
