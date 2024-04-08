@@ -55,10 +55,10 @@ export function SimulacrumWindow({ project }: { project: Project | null }) {
 
     return (
         <div className="simulacrumWindow" ref={container} >
-            <SimulacrumControlPanel
+{/*            <SimulacrumControlPanel
                 ref={controlPanel}
                 controlChangeHandler={(control: DragControl) => { if (simulacrum) simulacrum.dragControl = control }}
-            />
+            />*/}
         </div>
     )
 }

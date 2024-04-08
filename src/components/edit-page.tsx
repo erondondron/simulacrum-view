@@ -4,6 +4,7 @@ import { ControlPanel, MainWindow, PageHeader } from "./main-window"
 import { useEffect, useState } from "react"
 import { fetchProject } from "../data/requests"
 import { SimulacrumWindow } from "./simulacrum/window"
+import { CatalogPanel } from "./catalog-panel"
 
 enum EditPageButton {
     Run,
@@ -22,19 +23,19 @@ function EditPageControlPanel({ handlers = {} }: {
             buttons={[
                 <button key={EditPageButton.Run}
                     onClick={handlers[EditPageButton.Run] || defaultHandler}>
-                    <img src="/assets/images/icons/play-white.png" alt="Çàïóñòèòü ïðîåêò" />
+                    <img src="/assets/images/icons/play-white.png" alt="Ð—Ð°Ð¿ÑƒÑÑ‚Ð¸Ñ‚ÑŒ Ð¿Ñ€Ð¾ÐµÐºÑ‚" />
                 </button>,
                 <button key={EditPageButton.Save}
                     onClick={handlers[EditPageButton.Save] || defaultHandler}>
-                    <img src="/assets/images/icons/floppy-white.png" alt="Ñîõðàíèòü ïðîåêò" />
+                    <img src="/assets/images/icons/floppy-white.png" alt="Ð¡Ð¾Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑŒ Ð¿Ñ€Ð¾ÐµÐºÑ‚" />
                 </button>,
                 <button key={EditPageButton.Cancel}
                     onClick={handlers[EditPageButton.Cancel] || defaultHandler}>
-                    <img src="/assets/images/icons/cross-white.png" alt="Îòìåíèòü èçìåíåíèÿ" />
+                    <img src="/assets/images/icons/cross-white.png" alt="ÐžÑ‚Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ñ" />
                 </button>,
                 <button key={EditPageButton.Delete}
                     onClick={handlers[EditPageButton.Delete] || defaultHandler}>
-                    <img src="/assets/images/icons/trash-white.png" alt="Óäàëèòü ïðîåêò" />
+                    <img src="/assets/images/icons/trash-white.png" alt="Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¿Ñ€Ð¾ÐµÐºÑ‚" />
                 </button>,
             ]}
         />
@@ -61,7 +62,15 @@ export function EditPage() {
                     controls={<EditPageControlPanel />}
                 />
             }
-            body={<SimulacrumWindow project={project} />}
+            body={
+                <div className="editPage">
+                    <CatalogPanel />
+                    <SimulacrumWindow project={project} />
+                    <div className="objectPanel">
+                        <h3>ÐŸÐ°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ñ‹</h3>
+                    </div>
+                </div>
+            }
         />
     )
 }

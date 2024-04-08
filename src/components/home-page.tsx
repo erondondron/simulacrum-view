@@ -54,7 +54,7 @@ const ProjectsNavigation = forwardRef<ProjectNavigationRef, unknown>((_, ref) =>
         setProjects(projectsUpdate)
     }
 
-    useEffect(() => { updateProjectsList() })
+    useEffect(() => { updateProjectsList() }, [navigate])
     useImperativeHandle(ref, () => {
         async function createProject() {
             const project = await createNewProject()
