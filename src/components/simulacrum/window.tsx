@@ -47,6 +47,7 @@ export function SimulacrumWindow({ project }: { project: Project | null }) {
                 newSimulacrum.addObject(objInfo)
             }
             newSimulacrum.fitCameraPosition()
+            newSimulacrum.dragControlPanel = controlPanel.current
             setSimulacrum(newSimulacrum)
         }
         if (project) createSimulacrum(project)

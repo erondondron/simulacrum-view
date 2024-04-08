@@ -55,6 +55,7 @@ export class SimulacrumCanvas {
     protected stepTime: number = 0
 
     public dragControl: DragControl = DragControl.Movement
+    public dragControlPanel: HTMLDivElement | null = null
 
     constructor() {
         this.scene.background = new THREE.Color(0xfbf0d1)
@@ -143,7 +144,13 @@ export class SimulacrumCanvas {
             return
         this.selectedObject?.unselect()
         this.selectedObject = this.hoveredObject
-        this.selectedObject?.select()
+        if (this.selectedObject) {
+            this.selectedObject.select()
+            if (this.dragControlPanel) {
+                this.dragControlPanel.style.top = event.clientY + 'px'
+                this.dragControlPanel.style.left = event.clientX + 'px'
+            }
+        }
         if (this.onSelectObjectHook)
             this.onSelectObjectHook(this.selectedObject)
     }
