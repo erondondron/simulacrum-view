@@ -1,17 +1,15 @@
-import { ReactElement, ReactNode } from "react"
+import { ReactElement, ReactNode, forwardRef } from "react"
 import { useNavigate } from "react-router-dom"
 
-export function ControlPanel({ buttons }:
-    {
-        buttons: ReactElement<HTMLButtonElement>[],
-    }
-) {
+type ControlPanelProps = { buttons: ReactElement<HTMLButtonElement>[] }
+
+export const ControlPanel = forwardRef<HTMLDivElement, ControlPanelProps>(({ buttons }, ref) => {
     return (
-        <div className="controlPanel">
+        <div ref={ref} className="controlPanel">
             {buttons}
         </div>
     )
-}
+}) 
 
 export function PageHeader({ title, controls }:
     {

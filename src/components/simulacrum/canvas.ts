@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { Project, Queue, ObjectInfo, ObjectType, SimulacrumState } from '../../data/models'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { SimulacrumObject, MouseButton } from './models'
+import { SimulacrumObject, MouseButton, DragControl } from './models'
 
 /** 
  * @class - Класс визуализации трёхмерных объектов
@@ -28,6 +28,8 @@ import { SimulacrumObject, MouseButton } from './models'
  * @param eventLoop - Коллекция событий сцены. Каждое событие может нести в себе изменение координат объектов и пр 
  * @param stepDuration - События eventLoop должны происходить не чаще, чем длительность одного расчётного шага
  * @param stepTime - Время текущего расчётного шага
+ * 
+ * @param dragControl - Тип контроля при захвате в режиме редактирования
  */
 export class SimulacrumCanvas {
     protected renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer({ antialias: true })
@@ -51,6 +53,8 @@ export class SimulacrumCanvas {
     protected eventLoop: Queue<SimulacrumState> = new Queue()
     protected stepDuration: number = 1000 / 60
     protected stepTime: number = 0
+
+    public dragControl: DragControl = DragControl.Movement
 
     constructor() {
         this.scene.background = new THREE.Color(0xfbf0d1)

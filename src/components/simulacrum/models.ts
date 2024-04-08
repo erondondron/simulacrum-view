@@ -7,6 +7,13 @@ export enum MouseButton {
     Right,
 }
 
+export enum DragControl {
+    Movement,
+    XYRotation,
+    XZRotation,
+    YZRotation,
+}
+
 export class SimulacrumObject {
     uid: string
     isHovered: boolean
