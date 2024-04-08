@@ -7,7 +7,7 @@ export enum MouseButton {
     Right,
 }
 
-export class CanvasObject {
+export class SimulacrumObject {
     uid: string
     isHovered: boolean
     isSelected: boolean

@@ -198,3 +198,8 @@ img {
 .simulacrumWindow{
     overflow: hidden;
 }
+.simulacrumWindow > .controlPanel {
+    height: 3em;
+    width: fit-content;
+    position: absolute;
+}

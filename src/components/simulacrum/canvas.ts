@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { Project, Queue, ObjectInfo, ObjectType, SimulacrumState } from '../../data/models'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { CanvasObject, MouseButton } from './models'
+import { SimulacrumObject, MouseButton } from './models'
 
 /** 
  * @class - Класс визуализации трёхмерных объектов
@@ -36,17 +36,17 @@ export class SimulacrumCanvas {
     protected orbitControls: OrbitControls = new OrbitControls(this.camera, this.renderer.domElement)
 
     protected scene: THREE.Scene = new THREE.Scene()
-    protected objects: Record<string, CanvasObject> = {}
+    protected objects: Record<string, SimulacrumObject> = {}
 
     protected raycaster = new THREE.Raycaster();
     protected relPointer: THREE.Vector2 = new THREE.Vector2()
     protected absPointer: THREE.Vector3 = new THREE.Vector3()
 
-    protected hoveredObject: CanvasObject | null = null
-    protected selectedObject: CanvasObject | null = null
+    protected hoveredObject: SimulacrumObject | null = null
+    protected selectedObject: SimulacrumObject | null = null
 
-    public onHoverObjectHook: ((value: CanvasObject | null) => void) | null = null
-    public onSelectObjectHook: ((value: CanvasObject | null) => void) | null = null
+    public onHoverObjectHook: ((value: SimulacrumObject | null) => void) | null = null
+    public onSelectObjectHook: ((value: SimulacrumObject | null) => void) | null = null
 
     protected eventLoop: Queue<SimulacrumState> = new Queue()
     protected stepDuration: number = 1000 / 60
@@ -62,7 +62,7 @@ export class SimulacrumCanvas {
     }
 
     public addObject(info: ObjectInfo): void {
-        const object = new CanvasObject(info)
+        const object = new SimulacrumObject(info)
         this.scene.add(object.instance)
         this.objects[object.uid] = object
     }
@@ -187,7 +187,7 @@ export class SimulacrumCanvas {
 }
 
 export class EditableSimulacrumWindow extends SimulacrumCanvas {
-    protected draggedObject: CanvasObject | null = null
+    protected draggedObject: SimulacrumObject | null = null
     protected droppedHook: ((value: ObjectType | null) => void) | null = null
 
     constructor(project: Project) {
@@ -208,7 +208,7 @@ export class EditableSimulacrumWindow extends SimulacrumCanvas {
         info.type = type
         info.position.x = this.camera.left * 2
         info.position.y = this.camera.top * 2
-        this.draggedObject = new CanvasObject(info)
+        this.draggedObject = new SimulacrumObject(info)
         this.scene.add(this.draggedObject.instance)
     }
 
