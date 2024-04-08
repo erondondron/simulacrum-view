@@ -74,7 +74,7 @@ export class SimulacrumCanvas {
 
     public fitToContainer(container: HTMLDivElement): void {
         container.appendChild(this.renderer.domElement)
-        this.resizeCanvas(container)
+        this.resizeCanvas()
     }
 
     public fitCameraPosition(): void {
@@ -107,7 +107,7 @@ export class SimulacrumCanvas {
     }
 
     protected registerEvents() {
-        window.addEventListener('resize', this.onResizeWindow.bind(this))
+        window.addEventListener('resize', this.resizeCanvas.bind(this))
         window.addEventListener('wheel', this.onPointerMove.bind(this))
         window.addEventListener('mousemove', this.onPointerMove.bind(this))
         window.addEventListener('mousedown', this.onMouseDown.bind(this))
@@ -120,11 +120,6 @@ export class SimulacrumCanvas {
             RIGHT: THREE.MOUSE.PAN,
             LEFT: null,
         }
-    }
-
-    protected onResizeWindow(event: UIEvent): void {
-        if (event.target && event.target instanceof HTMLDivElement)
-            this.resizeCanvas(event.target)
     }
 
     protected onPointerMove(event: MouseEvent): void {
@@ -155,7 +150,9 @@ export class SimulacrumCanvas {
             this.onSelectObjectHook(this.selectedObject)
     }
 
-    protected resizeCanvas(container: HTMLDivElement): void {
+    protected resizeCanvas(): void {
+        const container = this.renderer.domElement.parentElement
+        if (!container) return
         this.camera.left = container.clientWidth / -2
         this.camera.right = container.clientWidth / 2
         this.camera.top = container.clientHeight / 2
