@@ -63,6 +63,7 @@ button:focus-visible {
 img {
     padding: 10%;
     max-width: 80%;
+    -webkit-user-drag: none;
 }
 
 /* Настройка светлой темы */
