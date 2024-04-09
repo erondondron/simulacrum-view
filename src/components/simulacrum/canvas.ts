@@ -1,8 +1,8 @@
 import * as THREE from 'three'
-import { Project, Queue, ObjectInfo, ObjectType, SimulacrumState, Vector } from '../../data/models'
+import { Queue, ObjectInfo, ObjectType, SimulacrumState, Vector } from '../../data/models'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { SimulacrumObject, MouseButton, DragControl } from './models'
-import { DragControls } from 'three/addons/controls/DragControls.js'
+import { MouseControler } from './mouse-controler'
 
 /** 
  * @class - Класс визуализации трёхмерных объектов
@@ -41,6 +41,10 @@ export class SimulacrumCanvas {
     protected scene: THREE.Scene = new THREE.Scene()
     protected objects: Record<string, SimulacrumObject> = {}
 
+    protected mouseController: MouseControler = new MouseControler(
+        this.renderer.domElement, this.camera, this.objects
+    )
+
     protected raycaster = new THREE.Raycaster();
     protected relPointer: THREE.Vector2 = new THREE.Vector2()
     protected absPointer: THREE.Vector3 = new THREE.Vector3()
@@ -56,7 +60,6 @@ export class SimulacrumCanvas {
     protected stepTime: number = 0
 
     public dragControl: DragControl = DragControl.Movement
-    protected controls: DragControls = new DragControls([], this.camera, this.renderer.domElement)
 
     constructor() {
         this.scene.background = new THREE.Color(0xfbf0d1)
@@ -65,8 +68,6 @@ export class SimulacrumCanvas {
         this.registerEvents()
         this.fitCameraPosition()
         this.animate()
-
-        this.controls.transformGroup = true
     }
 
     protected getScenePosition(outerPosition: Vector) {
@@ -86,17 +87,14 @@ export class SimulacrumCanvas {
         const info = new ObjectInfo()
         info.type = type
         info.position = this.getScenePosition(position)
-        this.addObject(info)
+        const object = this.addObject(info)
     }
 
-    public addObject(info: ObjectInfo): void {
+    public addObject(info: ObjectInfo): SimulacrumObject {
         const object = new SimulacrumObject(info)
         this.scene.add(object.instance)
         this.objects[object.uid] = object
-
-        const objects = this.controls.getObjects()
-        objects.push(object.instance)
-        this.controls.setObjects(objects)
+        return object
     }
 
     public fitToContainer(container: HTMLDivElement): void {
@@ -135,8 +133,6 @@ export class SimulacrumCanvas {
 
     protected registerEvents() {
         window.addEventListener('resize', this.resizeCanvas.bind(this))
-        window.addEventListener('wheel', this.onPointerMove.bind(this))
-        window.addEventListener('mousemove', this.onPointerMove.bind(this))
         window.addEventListener('mousedown', this.onMouseDown.bind(this))
         this.renderer.domElement.addEventListener('mouseup', this.onMouseUp.bind(this))
     }
@@ -147,11 +143,6 @@ export class SimulacrumCanvas {
             RIGHT: THREE.MOUSE.PAN,
             LEFT: null,
         }
-    }
-
-    protected onPointerMove(event: MouseEvent): void {
-        this.setPointerPosition(event)
-        this.hoverObject()
     }
 
     protected onMouseDown(event: MouseEvent): void {
@@ -186,66 +177,13 @@ export class SimulacrumCanvas {
             container.clientHeight,
         )
     }
-
-    protected setPointerPosition(event: MouseEvent) {
-        const containerX = event.clientX - this.renderer.domElement.offsetLeft
-        const containerY = event.clientY - this.renderer.domElement.offsetTop
-
-        const sceneX = (this.camera.left + containerX) / this.camera.zoom
-        const sceneY = (this.camera.top - containerY) / this.camera.zoom
-
-        this.absPointer.x = this.camera.position.x + sceneX
-        this.absPointer.y = this.camera.position.y + sceneY
-
-        this.relPointer.x = (this.camera.left + containerX) / this.camera.right
-        this.relPointer.y = (this.camera.top - containerY) / this.camera.top
-    }
-
-    protected hoverObject(): void {
-        this.raycaster.setFromCamera(this.relPointer, this.camera);
-        let currentHoveredObject = null
-        for (const obj of Object.values(this.objects)) {
-            const intersection = this.raycaster.intersectObject(obj.instance);
-            if (intersection.length === 0) continue
-            currentHoveredObject = obj
-            break
-        }
-        if (this.hoveredObject !== currentHoveredObject)
-            this.hoveredObject?.unhover()
-        this.hoveredObject = currentHoveredObject
-        this.hoveredObject?.hover()
-    }
 }
 
 export class EditableSimulacrumWindow extends SimulacrumCanvas {
-    protected draggedObject: SimulacrumObject | null = null
-    protected droppedHook: ((value: ObjectType | null) => void) | null = null
-
-    constructor(project: Project) {
-        super(project)
-        this.renderer.domElement.addEventListener('click', this.onMouseClicked.bind(this));
-    }
-
-    public setDroppedHook(hook: (value: ObjectType | null) => void): void {
-        this.droppedHook = hook
-    }
-
-    public setDraggedObject(type: ObjectType | null) {
-        if (this.draggedObject)
-            this.scene.remove(this.draggedObject.instance)
-        if (!type)
-            return
-        const info = new ObjectInfo()
-        info.type = type
-        info.position.x = this.camera.left * 2
-        info.position.y = this.camera.top * 2
-        this.draggedObject = new SimulacrumObject(info)
-        this.scene.add(this.draggedObject.instance)
-    }
 
     public getState(): SimulacrumState {
         const state = new SimulacrumState()
-        state.objects = Object.values(this.objects).map(item => itemgetInfot())
+        state.objects = Object.values(this.objects).map(item => item.getInfo())
         return state
     }
 
@@ -262,24 +200,5 @@ export class EditableSimulacrumWindow extends SimulacrumCanvas {
         state.rotation.y = object.rotation.y
         state.rotation.z = object.rotation.z
         return state
-    }
-
-    protected onMouseClicked() {
-        if (!this.draggedObject)
-            return
-        this.objects[this.draggedObject.instance.id] = this.draggedObject
-        this.draggedObject = null
-        if (this.droppedHook)
-            this.droppedHook(null)
-    }
-
-    protected onPointerMove(event: MouseEvent) {
-        this.setPointerPosition(event)
-        if (!this.draggedObject) {
-            this.hoverObject()
-            return
-        }
-        this.draggedObject.instance.position.x = this.absPointer.x
-        this.draggedObject.instance.position.y = this.absPointer.y
     }
 }
