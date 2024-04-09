@@ -1,6 +1,7 @@
 import react, { useState, useRef, useEffect } from "react";
+import { ObjectType } from "../data/models";
 
-export function CatalogPanel() {
+export function CatalogPanel({ onAddObjectHandler = () => { } }: { onAddObjectHandler: (type: ObjectType) => void }) {
     const [draggingObject, setDraggingObject] = useState<HTMLImageElement | null>(null)
     const panel = useRef<HTMLDivElement>(null)
 
@@ -19,6 +20,7 @@ export function CatalogPanel() {
 
         const handleDrag = (event: MouseEvent) => {
             if (event.clientX > borderX) {
+                onAddObjectHandler(draggingObject.className as ObjectType)
                 handleDragEnd()
                 return
             }
@@ -44,7 +46,7 @@ export function CatalogPanel() {
             panelInstance.removeEventListener('mouseup', handleDragEnd)
             panelInstance.removeEventListener('mousemove', handleDrag)
         }
-    }, [draggingObject]);
+    }, [draggingObject, onAddObjectHandler]);
 
     const onModelClicked = (event: react.MouseEvent) => {
         if (event.target instanceof HTMLImageElement)
@@ -55,10 +57,10 @@ export function CatalogPanel() {
         <div ref={panel} className="catalogPanel">
             <h3>Каталог объектов</h3>
             <div className="modelContainer">
-                <img onMouseDown={onModelClicked} src="/assets/images/models/cube.png" alt="Куб"></img>
+                <img className={ObjectType.Cube} onMouseDown={onModelClicked} src="/assets/images/models/cube.png" alt="Куб"></img>
             </div>
             <div className="modelContainer">
-                <img onMouseDown={onModelClicked} src="/assets/images/models/sphere.png" alt="Сфера"></img>
+                <img className={ObjectType.Sphere} onMouseDown={onModelClicked} src="/assets/images/models/sphere.png" alt="Сфера"></img>
             </div>
         </div>
     )

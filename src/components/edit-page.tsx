@@ -1,9 +1,9 @@
 import { useLocation, useParams } from "react-router-dom"
-import { Project } from "../data/models"
+import { ObjectType, Project } from "../data/models"
 import { ControlPanel, MainWindow, PageHeader } from "./main-window"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { fetchProject } from "../data/requests"
-import { SimulacrumWindow } from "./simulacrum/window"
+import { SimulacrumWindow, SimulacrumWindowRef } from "./simulacrum/window"
 import { CatalogPanel } from "./catalog-panel"
 
 enum EditPageButton {
@@ -45,6 +45,7 @@ function EditPageControlPanel({ handlers = {} }: {
 export function EditPage() {
     const { uuid } = useParams()
     const [project, setProject] = useState<Project | null>(useLocation().state)
+    const simulacrumRef = useRef<SimulacrumWindowRef>(null)
 
     const loadProject = async () => {
         if (project || !uuid) return
@@ -64,8 +65,10 @@ export function EditPage() {
             }
             body={
                 <div className="editPage">
-                    <CatalogPanel />
-                    <SimulacrumWindow project={project} />
+                    <CatalogPanel onAddObjectHandler={
+                        (type: ObjectType) => { if (simulacrumRef.current) simulacrumRef.current.addObject(type) }
+                    } />
+                    <SimulacrumWindow ref={simulacrumRef} project={project} />
                     <div className="objectPanel">
                         <h3>Параметры</h3>
                     </div>

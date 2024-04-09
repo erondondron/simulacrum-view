@@ -1,5 +1,5 @@
-import { forwardRef, useEffect, useRef, useState } from 'react'
-import { Project } from '../../data/models'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { ObjectType, Project } from '../../data/models'
 import { SimulacrumCanvas } from './canvas'
 import { fetchProjectObjects } from '../../data/requests'
 import { ControlPanel } from '../main-window'
@@ -32,7 +32,11 @@ export const SimulacrumControlPanel = forwardRef<HTMLDivElement, ControlPanelPro
     )
 }) 
 
-export function SimulacrumWindow({ project }: { project: Project | null }) {
+export type SimulacrumWindowRef = {
+    addObject: (type: ObjectType) => void,
+}
+
+export const SimulacrumWindow = forwardRef<SimulacrumWindowRef, { project: Project | null }>(({ project }, ref) => {
     const [simulacrum, setSimulacrum] = useState<SimulacrumCanvas | null>(null)
     const container = useRef<HTMLDivElement>(null)
     const controlPanel = useRef<HTMLDivElement>(null)
@@ -53,6 +57,11 @@ export function SimulacrumWindow({ project }: { project: Project | null }) {
         if (project) createSimulacrum(project)
     }, [project])
 
+    useImperativeHandle(ref, () => {
+        async function addObject(type: ObjectType) { console.log("Добавлен объект: " + type)}
+        return { addObject }
+    }, [])
+
     return (
         <div className="simulacrumWindow" ref={container} >
 {/*            <SimulacrumControlPanel
@@ -61,4 +70,4 @@ export function SimulacrumWindow({ project }: { project: Project | null }) {
             />*/}
         </div>
     )
-}
+})
