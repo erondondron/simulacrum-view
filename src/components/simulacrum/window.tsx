@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import { ObjectType, Project } from '../../data/models'
+import { ObjectType, Project, Vector } from '../../data/models'
 import { SimulacrumCanvas } from './canvas'
 import { fetchProjectObjects } from '../../data/requests'
 import { ControlPanel } from '../main-window'
@@ -33,13 +33,12 @@ export const SimulacrumControlPanel = forwardRef<HTMLDivElement, ControlPanelPro
 }) 
 
 export type SimulacrumWindowRef = {
-    addObject: (type: ObjectType) => void,
+    addObject: (type: ObjectType, position: Vector) => void,
 }
 
 export const SimulacrumWindow = forwardRef<SimulacrumWindowRef, { project: Project | null }>(({ project }, ref) => {
     const [simulacrum, setSimulacrum] = useState<SimulacrumCanvas | null>(null)
     const container = useRef<HTMLDivElement>(null)
-    const controlPanel = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         async function createSimulacrum(simProject: Project) {
@@ -51,16 +50,18 @@ export const SimulacrumWindow = forwardRef<SimulacrumWindowRef, { project: Proje
                 newSimulacrum.addObject(objInfo)
             }
             newSimulacrum.fitCameraPosition()
-            newSimulacrum.dragControlPanel = controlPanel.current
             setSimulacrum(newSimulacrum)
         }
         if (project) createSimulacrum(project)
     }, [project])
 
     useImperativeHandle(ref, () => {
-        async function addObject(type: ObjectType) { console.log("Добавлен объект: " + type)}
+        async function addObject(type: ObjectType, position: Vector) {
+            if (!simulacrum) return
+            simulacrum.addRelativeObject(type, position)
+        }
         return { addObject }
-    }, [])
+    }, [simulacrum])
 
     return (
         <div className="simulacrumWindow" ref={container} >

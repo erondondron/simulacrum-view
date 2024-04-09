@@ -1,7 +1,7 @@
 import react, { useState, useRef, useEffect } from "react";
-import { ObjectType } from "../data/models";
+import { ObjectType, Vector } from "../data/models";
 
-export function CatalogPanel({ onAddObjectHandler = () => { } }: { onAddObjectHandler: (type: ObjectType) => void }) {
+export function CatalogPanel({ onAddObjectHandler = () => { } }: { onAddObjectHandler: (type: ObjectType, position: Vector) => void }) {
     const [draggingObject, setDraggingObject] = useState<HTMLImageElement | null>(null)
     const panel = useRef<HTMLDivElement>(null)
 
@@ -20,7 +20,8 @@ export function CatalogPanel({ onAddObjectHandler = () => { } }: { onAddObjectHa
 
         const handleDrag = (event: MouseEvent) => {
             if (event.clientX > borderX) {
-                onAddObjectHandler(draggingObject.className as ObjectType)
+                const position = new Vector(event.clientX, event.clientY)
+                onAddObjectHandler(draggingObject.className as ObjectType, position)
                 handleDragEnd()
                 return
             }

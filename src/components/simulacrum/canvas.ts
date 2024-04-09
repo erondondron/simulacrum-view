@@ -1,7 +1,8 @@
 import * as THREE from 'three'
-import { Project, Queue, ObjectInfo, ObjectType, SimulacrumState } from '../../data/models'
+import { Project, Queue, ObjectInfo, ObjectType, SimulacrumState, Vector } from '../../data/models'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { SimulacrumObject, MouseButton, DragControl } from './models'
+import { DragControls } from 'three/addons/controls/DragControls.js'
 
 /** 
  * @class - Класс визуализации трёхмерных объектов
@@ -55,7 +56,7 @@ export class SimulacrumCanvas {
     protected stepTime: number = 0
 
     public dragControl: DragControl = DragControl.Movement
-    public dragControlPanel: HTMLDivElement | null = null
+    protected controls: DragControls = new DragControls([], this.camera, this.renderer.domElement)
 
     constructor() {
         this.scene.background = new THREE.Color(0xfbf0d1)
@@ -64,12 +65,38 @@ export class SimulacrumCanvas {
         this.registerEvents()
         this.fitCameraPosition()
         this.animate()
+
+        this.controls.transformGroup = true
+    }
+
+    protected getScenePosition(outerPosition: Vector) {
+        const containerX = outerPosition.x - this.renderer.domElement.offsetLeft
+        const containerY = outerPosition.y - this.renderer.domElement.offsetTop
+
+        const sceneX = (this.camera.left + containerX) / this.camera.zoom
+        const sceneY = (this.camera.top - containerY) / this.camera.zoom
+
+        return new Vector(
+            this.camera.position.x + sceneX,
+            this.camera.position.y + sceneY
+        )
+    }
+
+    public addRelativeObject(type: ObjectType, position: Vector) {
+        const info = new ObjectInfo()
+        info.type = type
+        info.position = this.getScenePosition(position)
+        this.addObject(info)
     }
 
     public addObject(info: ObjectInfo): void {
         const object = new SimulacrumObject(info)
         this.scene.add(object.instance)
         this.objects[object.uid] = object
+
+        const objects = this.controls.getObjects()
+        objects.push(object.instance)
+        this.controls.setObjects(objects)
     }
 
     public fitToContainer(container: HTMLDivElement): void {
@@ -141,10 +168,6 @@ export class SimulacrumCanvas {
         this.selectedObject = this.hoveredObject
         if (this.selectedObject) {
             this.selectedObject.select()
-            if (this.dragControlPanel) {
-                this.dragControlPanel.style.top = event.clientY + 'px'
-                this.dragControlPanel.style.left = event.clientX + 'px'
-            }
         }
         if (this.onSelectObjectHook)
             this.onSelectObjectHook(this.selectedObject)

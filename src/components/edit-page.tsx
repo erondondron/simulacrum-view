@@ -1,5 +1,5 @@
 import { useLocation, useParams } from "react-router-dom"
-import { ObjectType, Project } from "../data/models"
+import { ObjectType, Project, Vector } from "../data/models"
 import { ControlPanel, MainWindow, PageHeader } from "./main-window"
 import { useEffect, useRef, useState } from "react"
 import { fetchProject } from "../data/requests"
@@ -66,7 +66,7 @@ export function EditPage() {
             body={
                 <div className="editPage">
                     <CatalogPanel onAddObjectHandler={
-                        (type: ObjectType) => { if (simulacrumRef.current) simulacrumRef.current.addObject(type) }
+                        (type: ObjectType, position: Vector) => { if (simulacrumRef.current) simulacrumRef.current.addObject(type, position) }
                     } />
                     <SimulacrumWindow ref={simulacrumRef} project={project} />
                     <div className="objectPanel">
