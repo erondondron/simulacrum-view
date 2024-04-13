@@ -78,29 +78,14 @@ export class SimulacrumObject {
     }
 
     public hover() {
-        if (this.isHovered) return
-        this.isHovered = true
-        if (!this.isSelected)
-            this.bodyMaterial.color.set('#c8a2c8')
+        this.bodyMaterial.color.set('#c8a2c8')
     }
 
-    public unhover() {
-        this.isHovered = false
-        if (!this.isSelected)
-            this.bodyMaterial.color.set('white')
-    }
-
-    public preselect() {
-        this.bodyMaterial.color.set('#7851a9')
+    public release() {
+        this.bodyMaterial.color.set("white")
     }
 
     public select() {
-        this.isSelected = true
         this.bodyMaterial.color.set('#7851a9')
-    }
-
-    public unselect() {
-        this.isSelected = false
-        this.bodyMaterial.color.set('white')
     }
 }

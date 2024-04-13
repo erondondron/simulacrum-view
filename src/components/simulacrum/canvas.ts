@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import { Queue, ObjectInfo, ObjectType, SimulacrumState, Vector } from '../../data/models'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { SimulacrumObject, MouseButton, DragControl } from './models'
-import { MouseControler } from './mouse-controler'
+import { SimulacrumObject, DragControl } from './models'
+import { MouseController } from './mouse-controller.ts'
 
 /** 
  * @class - Класс визуализации трёхмерных объектов
@@ -41,19 +41,9 @@ export class SimulacrumCanvas {
     protected scene: THREE.Scene = new THREE.Scene()
     protected objects: Record<string, SimulacrumObject> = {}
 
-    protected mouseController: MouseControler = new MouseControler(
+    protected mouseController: MouseController = new MouseController(
         this.renderer.domElement, this.camera, this.objects
     )
-
-    protected raycaster = new THREE.Raycaster();
-    protected relPointer: THREE.Vector2 = new THREE.Vector2()
-    protected absPointer: THREE.Vector3 = new THREE.Vector3()
-
-    protected hoveredObject: SimulacrumObject | null = null
-    protected selectedObject: SimulacrumObject | null = null
-
-    public onHoverObjectHook: ((value: SimulacrumObject | null) => void) | null = null
-    public onSelectObjectHook: ((value: SimulacrumObject | null) => void) | null = null
 
     protected eventLoop: Queue<SimulacrumState> = new Queue()
     protected stepDuration: number = 1000 / 60
@@ -133,8 +123,6 @@ export class SimulacrumCanvas {
 
     protected registerEvents() {
         window.addEventListener('resize', this.resizeCanvas.bind(this))
-        window.addEventListener('mousedown', this.onMouseDown.bind(this))
-        this.renderer.domElement.addEventListener('mouseup', this.onMouseUp.bind(this))
     }
 
     protected setOrbitControls(): void {
@@ -143,25 +131,6 @@ export class SimulacrumCanvas {
             RIGHT: THREE.MOUSE.PAN,
             LEFT: null,
         }
-    }
-
-    protected onMouseDown(event: MouseEvent): void {
-        if (event.button !== MouseButton.Left)
-            return
-        this.selectedObject?.unselect()
-        this.hoveredObject?.preselect()
-    }
-
-    protected onMouseUp(event: MouseEvent): void {
-        if (event.button !== MouseButton.Left)
-            return
-        this.selectedObject?.unselect()
-        this.selectedObject = this.hoveredObject
-        if (this.selectedObject) {
-            this.selectedObject.select()
-        }
-        if (this.onSelectObjectHook)
-            this.onSelectObjectHook(this.selectedObject)
     }
 
     protected resizeCanvas(): void {
