@@ -6,17 +6,21 @@ import {
     Vector2,
     Vector3
 } from 'three';
-import {DraggingMode, MouseButton, SimulacrumObject} from './models';
+import {DraggingMode, MouseButton, SimulacrumObject} from './models'
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
+import * as THREE from "three";
 
 export class MouseController extends EventDispatcher {
+    protected orbitControls: OrbitControls
     protected rayCaster: Raycaster = new Raycaster()
-    protected relativePointer: Vector2 = new Vector2()
-    protected absolutePointer: Vector3 = new Vector3()
+    public relativePointer: Vector2 = new Vector2()
+    public absolutePointer: Vector3 = new Vector3()
+
     protected plane: Plane
 
-    protected hoveredObject: SimulacrumObject | null = null
-    protected selectedObject: SimulacrumObject | null = null
-    protected draggingObject: SimulacrumObject | null = null
+    public hoveredObject: SimulacrumObject | null = null
+    public selectedObject: SimulacrumObject | null = null
+    public draggingObject: SimulacrumObject | null = null
 
     public draggingMode: DraggingMode = DraggingMode.Movement
 
@@ -26,10 +30,11 @@ export class MouseController extends EventDispatcher {
         protected objects: Record<string, SimulacrumObject>
     ) {
         super()
-        this.activate()
-
         // TODO(erondondron): Плоскости должны задаваться сценой
         this.plane = new Plane(this.camera.getWorldDirection(new Vector3()))
+        this.orbitControls = new OrbitControls(this.camera, this.canvas)
+        this.setOrbitControls()
+        this.activate()
     }
 
     public dispose(): void { this.deactivate() }
@@ -48,6 +53,14 @@ export class MouseController extends EventDispatcher {
         this.canvas.removeEventListener('pointerdown', this.onPointerDown.bind(this))
         this.canvas.removeEventListener('pointerup', this.onPointerUp.bind(this))
         // this.canvas.removeEventListener('pointerleave', onPointerCancel)
+    }
+
+    protected setOrbitControls(): void {
+        this.orbitControls.mouseButtons = {
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: THREE.MOUSE.PAN,
+            LEFT: null,
+        }
     }
 
     protected setPointer(): void {

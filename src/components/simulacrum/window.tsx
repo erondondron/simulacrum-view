@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import { ObjectType, Project, Vector } from '../../data/models'
+import { ObjectType, Project } from '../../data/models'
 import { SimulacrumCanvas } from './canvas'
 import { fetchProjectObjects } from '../../data/requests'
 import { ControlPanel } from '../main-window'
@@ -33,7 +33,7 @@ export const SimulacrumControlPanel = forwardRef<HTMLDivElement, ControlPanelPro
 }) 
 
 export type SimulacrumWindowRef = {
-    addObject: (type: ObjectType, position: Vector) => void,
+    createObject: (type: ObjectType) => void,
 }
 
 export const SimulacrumWindow = forwardRef<SimulacrumWindowRef, { project: Project | null }>(({ project }, ref) => {
@@ -56,11 +56,11 @@ export const SimulacrumWindow = forwardRef<SimulacrumWindowRef, { project: Proje
     }, [project])
 
     useImperativeHandle(ref, () => {
-        async function addObject(type: ObjectType, position: Vector) {
+        async function createObject(type: ObjectType) {
             if (!simulacrum) return
-            simulacrum.addRelativeObject(type, position)
+            simulacrum.createObject(type)
         }
-        return { addObject }
+        return { createObject }
     }, [simulacrum])
 
     return (

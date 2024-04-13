@@ -47,7 +47,7 @@ export function EditPage() {
     const [project, setProject] = useState<Project | null>(useLocation().state)
     const simulacrumRef = useRef<SimulacrumWindowRef>(null)
 
-    const loadProject = async () => {
+    const loadProject = async (): Promise<void> => {
         if (project || !uuid) return
         const projectUpdate = await fetchProject(uuid)
         setProject(projectUpdate)
@@ -66,7 +66,10 @@ export function EditPage() {
             body={
                 <div className="editPage">
                     <CatalogPanel onAddObjectHandler={
-                        (type: ObjectType, position: Vector) => { if (simulacrumRef.current) simulacrumRef.current.addObject(type, position) }
+                        (type: ObjectType) => {
+                            if (simulacrumRef.current)
+                                simulacrumRef.current.createObject(type)
+                        }
                     } />
                     <SimulacrumWindow ref={simulacrumRef} project={project} />
                     <div className="objectPanel">
