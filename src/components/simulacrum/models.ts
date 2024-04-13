@@ -7,7 +7,7 @@ export enum MouseButton {
     Right,
 }
 
-export enum DragControl {
+export enum DraggingMode {
     Movement,
     XYRotation,
     XZRotation,

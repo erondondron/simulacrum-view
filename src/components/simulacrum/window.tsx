@@ -3,29 +3,29 @@ import { ObjectType, Project, Vector } from '../../data/models'
 import { SimulacrumCanvas } from './canvas'
 import { fetchProjectObjects } from '../../data/requests'
 import { ControlPanel } from '../main-window'
-import { DragControl } from './models'
+import { DraggingMode } from './models'
 
-type ControlPanelProps = { controlChangeHandler: (control: DragControl) => void }
+type ControlPanelProps = { controlChangeHandler: (control: DraggingMode) => void }
 
 export const SimulacrumControlPanel = forwardRef<HTMLDivElement, ControlPanelProps>(({ controlChangeHandler }, ref) => {
     return (
         <ControlPanel ref={ ref }
             buttons={[
-                <button key={DragControl.Movement}
-                    onClick={() => {controlChangeHandler(DragControl.Movement)}}>
-                    <img src="/assets/images/icons/movement-white.png" alt="Перемещение" />
+                <button key={DraggingMode.Movement}
+                    onClick={() => {controlChangeHandler(DraggingMode.Movement)}}>
+                    <img src="/assets/images/icons/movement-white.png" alt="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" />
                 </button>,
-                <button key={DragControl.XYRotation}
-                    onClick={() => { controlChangeHandler(DragControl.XYRotation) }}>
-                    <img src="/assets/images/icons/front-rotation-white.png" alt="Вращение в плоскости XY" />
+                <button key={DraggingMode.XYRotation}
+                    onClick={() => { controlChangeHandler(DraggingMode.XYRotation) }}>
+                    <img src="/assets/images/icons/front-rotation-white.png" alt="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ XY" />
                 </button>,
-                <button key={DragControl.XZRotation}
-                    onClick={() => { controlChangeHandler(DragControl.XZRotation) }}>
-                    <img src="/assets/images/icons/vertical-rotation-white.png" alt="Вращение в плоскости XZ" />
+                <button key={DraggingMode.XZRotation}
+                    onClick={() => { controlChangeHandler(DraggingMode.XZRotation) }}>
+                    <img src="/assets/images/icons/vertical-rotation-white.png" alt="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ XZ" />
                 </button>,
-                <button key={DragControl.YZRotation}
-                    onClick={() => { controlChangeHandler(DragControl.YZRotation) }}>
-                    <img src="/assets/images/icons/horizontal-rotation-white.png" alt="Вращение в плоскости YZ" />
+                <button key={DraggingMode.YZRotation}
+                    onClick={() => { controlChangeHandler(DraggingMode.YZRotation) }}>
+                    <img src="/assets/images/icons/horizontal-rotation-white.png" alt="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ YZ" />
                 </button>,
             ]}
         />

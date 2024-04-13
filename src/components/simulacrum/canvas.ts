@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { Queue, ObjectInfo, ObjectType, SimulacrumState, Vector } from '../../data/models'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { SimulacrumObject, DragControl } from './models'
+import { SimulacrumObject, DraggingMode } from './models'
 import { MouseController } from './mouse-controller.ts'
 
 /** 
@@ -49,7 +49,7 @@ export class SimulacrumCanvas {
     protected stepDuration: number = 1000 / 60
     protected stepTime: number = 0
 
-    public dragControl: DragControl = DragControl.Movement
+    public dragControl: DraggingMode = DraggingMode.Movement
 
     constructor() {
         this.scene.background = new THREE.Color(0xfbf0d1)

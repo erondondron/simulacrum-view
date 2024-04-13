@@ -1,15 +1,24 @@
-import { EventDispatcher, OrthographicCamera, Raycaster, Vector2, Vector3} from 'three';
-import {MouseButton, SimulacrumObject} from './models';
+import {
+    EventDispatcher,
+    OrthographicCamera,
+    Plane,
+    Raycaster,
+    Vector2,
+    Vector3
+} from 'three';
+import {DraggingMode, MouseButton, SimulacrumObject} from './models';
 
-// TODO(erondondron): Если сигналы не планируется посылать, тогда EventDispatcher не нужен
 export class MouseController extends EventDispatcher {
     protected rayCaster: Raycaster = new Raycaster()
     protected relativePointer: Vector2 = new Vector2()
     protected absolutePointer: Vector3 = new Vector3()
+    protected plane: Plane
 
     protected hoveredObject: SimulacrumObject | null = null
     protected selectedObject: SimulacrumObject | null = null
     protected draggingObject: SimulacrumObject | null = null
+
+    public draggingMode: DraggingMode = DraggingMode.Movement
 
     constructor(
         protected canvas: HTMLCanvasElement,
@@ -18,6 +27,9 @@ export class MouseController extends EventDispatcher {
     ) {
         super()
         this.activate()
+
+        // TODO(erondondron): Плоскости должны задаваться сценой
+        this.plane = new Plane(this.camera.getWorldDirection(new Vector3()))
     }
 
     public dispose(): void { this.deactivate() }
@@ -39,13 +51,23 @@ export class MouseController extends EventDispatcher {
     }
 
     protected setPointer(): void {
-        // if selected - drag or rotate mode
-        // if hovered - selection mode
-        if (!this.hoveredObject) {
-            this.canvas.style.cursor = 'auto'
+        if (
+            this.draggingObject
+            || this.selectedObject !== null
+            && this.selectedObject === this.hoveredObject
+        ) {
+            this.canvas.style.cursor = 'move'
             return
         }
-        this.canvas.style.cursor = 'pointer'
+        if (
+            this.hoveredObject
+            && this.hoveredObject !== this.selectedObject
+        )
+        {
+            this.canvas.style.cursor = 'pointer'
+            return
+        }
+        this.canvas.style.cursor = 'auto'
     }
 
     protected setPointerPosition(event: MouseEvent): void {
@@ -60,6 +82,8 @@ export class MouseController extends EventDispatcher {
 
         this.relativePointer.x = (this.camera.left + containerX) / this.camera.right
         this.relativePointer.y = (this.camera.top - containerY) / this.camera.top
+
+        this.rayCaster.setFromCamera(this.relativePointer, this.camera)
     }
 
     protected getIntersection(): SimulacrumObject | null {
@@ -84,6 +108,13 @@ export class MouseController extends EventDispatcher {
             this.hoveredObject?.hover()
     }
 
+    protected moveObject(): void {
+        if (!this.draggingObject) return
+        const intersection = this.rayCaster.ray.intersectPlane(this.plane, new Vector3())
+        if (!intersection) return
+        this.draggingObject.instance.position.copy(intersection)
+    }
+
     protected onPointerMove(event: MouseEvent): void {
         this.setPointerPosition(event)
         if (!this.draggingObject){
@@ -91,12 +122,19 @@ export class MouseController extends EventDispatcher {
             this.setPointer()
             return
         }
-        // move or rotate
+        if (this.draggingMode === DraggingMode.Movement){
+            this.moveObject()
+            return
+        }
     }
 
     protected onPointerDown(event: MouseEvent): void {
         if (event.button !== MouseButton.Left)
             return
+        if (this.hoveredObject === this.selectedObject){
+            this.draggingObject = this.selectedObject
+            return
+        }
         this.selectedObject?.release()
         this.hoveredObject?.select()
     }
@@ -104,10 +142,16 @@ export class MouseController extends EventDispatcher {
     protected onPointerUp(event: MouseEvent): void {
         if (event.button !== MouseButton.Left)
             return
+        if (this.draggingObject) {
+            this.draggingObject = null
+            this.setPointer()
+            return
+        }
         this.selectedObject?.release()
         this.selectedObject = this.hoveredObject
         if (this.selectedObject) {
             this.selectedObject.select()
         }
+        this.setPointer()
     }
 }
