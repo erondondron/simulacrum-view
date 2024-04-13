@@ -1,7 +1,11 @@
-import react, { useState, useRef, useEffect } from "react";
-import { ObjectType, Vector } from "../data/models";
+import react, {useState, useRef, useEffect} from "react";
+import {ObjectType} from "../data/models";
 
-export function CatalogPanel({ onAddObjectHandler = () => { } }: { onAddObjectHandler: (type: ObjectType, position: Vector) => void }) {
+type CatalogPanelProps = {
+    onObjectCreateHandler: (type: ObjectType) => void
+}
+
+export function CatalogPanel({ onObjectCreateHandler = () => {} }: CatalogPanelProps) {
     const [draggingObject, setDraggingObject] = useState<HTMLImageElement | null>(null)
     const panel = useRef<HTMLDivElement>(null)
 
@@ -20,8 +24,7 @@ export function CatalogPanel({ onAddObjectHandler = () => { } }: { onAddObjectHa
 
         const handleDrag = (event: MouseEvent) => {
             if (event.clientX > borderX) {
-                const position = new Vector(event.clientX, event.clientY)
-                onAddObjectHandler(draggingObject.className as ObjectType, position)
+                onObjectCreateHandler(draggingObject.className as ObjectType)
                 handleDragEnd()
                 return
             }
@@ -47,7 +50,7 @@ export function CatalogPanel({ onAddObjectHandler = () => { } }: { onAddObjectHa
             panelInstance.removeEventListener('mouseup', handleDragEnd)
             panelInstance.removeEventListener('mousemove', handleDrag)
         }
-    }, [draggingObject, onAddObjectHandler]);
+    }, [draggingObject, onObjectCreateHandler]);
 
     const onModelClicked = (event: react.MouseEvent) => {
         if (event.target instanceof HTMLImageElement)
@@ -58,10 +61,12 @@ export function CatalogPanel({ onAddObjectHandler = () => { } }: { onAddObjectHa
         <div ref={panel} className="catalogPanel">
             <h3>Каталог объектов</h3>
             <div className="modelContainer">
-                <img className={ObjectType.Cube} onMouseDown={onModelClicked} src="/assets/images/models/cube.png" alt="Куб"></img>
+                <img className={ObjectType.Cube} onMouseDown={onModelClicked}
+                     src="/assets/images/models/cube.png" alt="Куб"></img>
             </div>
             <div className="modelContainer">
-                <img className={ObjectType.Sphere} onMouseDown={onModelClicked} src="/assets/images/models/sphere.png" alt="Сфера"></img>
+                <img className={ObjectType.Sphere} onMouseDown={onModelClicked}
+                     src="/assets/images/models/sphere.png" alt="Сфера"></img>
             </div>
         </div>
     )

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import { ControlPanel, PageHeader, MainWindow } from "./main-window"
 import { Project } from "../data/models"
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
-import { createNewProject, fetchProjects } from "../data/requests"
+import { createNewProject, getProjects } from "../data/requests"
 
 enum HomePageButton {
     NewProject,
@@ -50,11 +50,11 @@ const ProjectsNavigation = forwardRef<ProjectNavigationRef, unknown>((_, ref) =>
     const [projects, setProjects] = useState<Project[]>([])
 
     async function updateProjectsList() {
-        const projectsUpdate = await fetchProjects()
+        const projectsUpdate = await getProjects()
         setProjects(projectsUpdate)
     }
 
-    useEffect(() => { updateProjectsList() }, [navigate])
+    useEffect(() => { void updateProjectsList() }, [navigate])
     useImperativeHandle(ref, () => {
         async function createProject() {
             const project = await createNewProject()
@@ -71,7 +71,11 @@ const ProjectsNavigation = forwardRef<ProjectNavigationRef, unknown>((_, ref) =>
             <h2>Доступные проекты:</h2>
             <ul>
                 {projects.map(project => (
-                    <li key={project.uid} onClick={() => navigate(`/projects/${project.uid}`, { state: project })}>
+                    <li key={project.uid} onClick={
+                        () => navigate(
+                            `/projects/${project.uid}`,
+                            { state: project },
+                        )}>
                         {project.name}
                     </li>
                 ))}

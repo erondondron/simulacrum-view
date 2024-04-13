@@ -4,13 +4,12 @@ import { Project, SimulacrumState } from "./models"
 const REST_URL = 'http://localhost:8000/api'
 const WS_URL = 'ws://localhost:8000/api'
 
-export async function fetchProjects(): Promise<Array<Project>> {
+export async function getProjects(): Promise<Array<Project>> {
     return (
         fetch(`${REST_URL}/projects`)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error("Не удалось получить список проектов")
-                }
+                if (!response.ok)
+                    throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РїСЂРѕРµРєС‚РѕРІ")
                 return response.json() as Promise<Record<string, unknown>[]>
             })
             .then(json => {
@@ -23,9 +22,8 @@ export async function createNewProject(): Promise<Project> {
     return (
         fetch(`${REST_URL}/projects`, { method: "POST" })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error("Не удалось создать проект")
-                }
+                if (!response.ok)
+                    throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ РїСЂРѕРµРєС‚")
                 return response.json()
             })
             .then(json => {
@@ -34,13 +32,12 @@ export async function createNewProject(): Promise<Project> {
     )
 }
 
-export async function fetchProject(uid: string): Promise<Project> {
+export async function getProject(uid: string): Promise<Project> {
     return (
         fetch(`${REST_URL}/projects/${uid}`)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error("Не удалось получить проект")
-                }
+                if (!response.ok)
+                    throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РїСЂРѕРµРєС‚")
                 return response.json() as Promise<Record<string, unknown>>
             })
             .then(json => {
@@ -49,17 +46,57 @@ export async function fetchProject(uid: string): Promise<Project> {
     )
 }
 
-export async function fetchProjectObjects(project_uid: string): Promise<SimulacrumState> {
+export async function saveProject(project: Project): Promise<void> {
+    return (
+        fetch(`${REST_URL}/projects/${project.uid}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(project),
+        })
+        .then(response => {
+            if (!response.ok)
+                throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ РїСЂРѕРµРєС‚")
+            return
+        })
+    )
+}
+
+export async function deleteProject(project_uid: string): Promise<void> {
+        return (
+        fetch(`${REST_URL}/projects/${project_uid}`, { method: 'DELETE' })
+        .then(response => {
+            if (!response.ok)
+                throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ РїСЂРѕРµРєС‚")
+            return
+        })
+    )
+}
+
+export async function getProjectObjects(project_uid: string): Promise<SimulacrumState> {
     return (
         fetch(`${REST_URL}/projects/${project_uid}/objects`)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error("Не удалось получить список объектов для проекта")
-                }
+                if (!response.ok)
+                    throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РѕР±СЉРµРєС‚РѕРІ РґР»СЏ РїСЂРѕРµРєС‚Р°")
                 return response.json() as Promise<Record<string, unknown>>
             })
             .then(stateJson => {
                 return plainToClass(SimulacrumState, stateJson)
+            })
+    )
+}
+
+export async function saveProjectObjects(project_uid: string, objects: SimulacrumState): Promise<void> {
+    return (
+        fetch(`${REST_URL}/projects/${project_uid}/objects`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(objects),
+            })
+            .then(response => {
+                if (!response.ok)
+                    throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ РѕР±СЉРµРєС‚С‹")
+                return
             })
     )
 }

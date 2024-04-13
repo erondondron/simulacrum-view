@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Project, ObjectType, Vector } from './data/models'
 import { plainToClass } from 'class-transformer'
-import { EditableSimulacrumWindow, Object3D } from './components/simulacrum/canvas'
+import { EditableSimulacrumWindow, Object3D } from './simulacrum/canvas'
 
 export function SimulacrumEditPage() {
     const navigate = useNavigate()

@@ -6,7 +6,7 @@ import {
     Vector2,
     Vector3
 } from 'three';
-import {DraggingMode, MouseButton, SimulacrumObject} from './models'
+import {DraggingMode, MouseButton, SimulacrumObject} from './models.ts'
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 import * as THREE from "three";
 

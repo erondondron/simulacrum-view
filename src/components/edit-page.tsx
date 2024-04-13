@@ -1,9 +1,14 @@
-import { useLocation, useParams } from "react-router-dom"
-import { ObjectType, Project, Vector } from "../data/models"
+import {useLocation, useNavigate, useParams} from "react-router-dom"
+import { ObjectType, Project } from "../data/models"
 import { ControlPanel, MainWindow, PageHeader } from "./main-window"
 import { useEffect, useRef, useState } from "react"
-import { fetchProject } from "../data/requests"
-import { SimulacrumWindow, SimulacrumWindowRef } from "./simulacrum/window"
+import {
+    deleteProject,
+    getProject,
+    saveProject,
+    saveProjectObjects
+} from "../data/requests"
+import { SimulacrumWindow, SimulacrumWindowRef } from "../simulacrum/window"
 import { CatalogPanel } from "./catalog-panel"
 
 enum EditPageButton {
@@ -43,29 +48,55 @@ function EditPageControlPanel({ handlers = {} }: {
 }
 
 export function EditPage() {
+    const navigate = useNavigate()
     const { uuid } = useParams()
     const [project, setProject] = useState<Project | null>(useLocation().state)
     const simulacrumRef = useRef<SimulacrumWindowRef>(null)
 
     const loadProject = async (): Promise<void> => {
         if (project || !uuid) return
-        const projectUpdate = await fetchProject(uuid)
+        const projectUpdate = await getProject(uuid)
         setProject(projectUpdate)
     }
 
-    useEffect(() => { loadProject() })
+    const onProjectSaveHandler = async (): Promise<void> => {
+        if (!project || !simulacrumRef.current) return
+        void saveProject(project)
+        const objects = await simulacrumRef.current.getObjects()
+        void saveProjectObjects(project.uid, objects)
+        navigate(`/projects/${project.uid}`, { state: project })
+    }
+
+    const onChangesCancelHandler = async (): Promise<void> => {
+        if (!project) return
+        navigate(`/projects/${project.uid}`)
+    }
+
+    const onProjectDeleteHandler = async (): Promise<void> => {
+        if (!project) return
+        void deleteProject(project.uid)
+        navigate("/")
+    }
+
+    useEffect(() => { void loadProject() })
+
+    const controlPanel = <EditPageControlPanel
+        handlers={{
+            [EditPageButton.Save]: onProjectSaveHandler,
+            [EditPageButton.Delete]: onProjectDeleteHandler,
+            [EditPageButton.Cancel]: onChangesCancelHandler,
+    }}/>
 
     return (
         <MainWindow
             header={
                 <PageHeader
                     title={<h1>{project?.name}</h1>}
-                    controls={<EditPageControlPanel />}
-                />
+                    controls={controlPanel}/>
             }
             body={
                 <div className="editPage">
-                    <CatalogPanel onAddObjectHandler={
+                    <CatalogPanel onObjectCreateHandler={
                         (type: ObjectType) => {
                             if (simulacrumRef.current)
                                 simulacrumRef.current.createObject(type)

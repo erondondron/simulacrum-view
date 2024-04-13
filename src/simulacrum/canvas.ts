@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import { Queue, ObjectInfo, ObjectType, SimulacrumState } from '../../data/models'
-import { SimulacrumObject } from './models'
+import { Queue, ObjectInfo, ObjectType, SimulacrumState } from '../data/models.ts'
+import { SimulacrumObject } from './models.ts'
 import { MouseController } from './mouse-controller.ts'
 
 export class SimulacrumCanvas {
@@ -93,28 +93,10 @@ export class SimulacrumCanvas {
             container.clientHeight,
         )
     }
-}
-
-export class EditableSimulacrumWindow extends SimulacrumCanvas {
 
     public getState(): SimulacrumState {
         const state = new SimulacrumState()
         state.objects = Object.values(this.objects).map(item => item.getInfo())
-        return state
-    }
-
-    protected getObjectState(object: THREE.Object3D): ObjectInfo {
-        const state = new ObjectInfo()
-        state.id = object.id
-        const mesh = object.children[0]
-        const isCube = mesh instanceof THREE.Mesh && mesh.geometry instanceof THREE.BoxGeometry
-        state.type = isCube ? ObjectType.Cube : ObjectType.Sphere
-        state.position.x = object.position.x
-        state.position.y = object.position.y
-        state.position.z = object.position.z
-        state.rotation.x = object.rotation.x
-        state.rotation.y = object.rotation.y
-        state.rotation.z = object.rotation.z
         return state
     }
 }
