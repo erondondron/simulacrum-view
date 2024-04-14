@@ -1,48 +1,48 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { ControlPanel, MainWindow, PageHeader } from './main-window'
-import { Project } from '../data/models'
-import { SimulacrumWindow } from '../simulacrum/window'
-import { getProject } from '../data/requests'
+import {useContext, useEffect} from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import {SimulacrumWindow} from "./simulacrum-window.tsx";
+import {ProjectContext, ProjectStoreContext} from "../core/project-store.ts";
+import {ControlPanelButton, MainWindow, PageHeader} from "./main-window.tsx";
+import {observer} from "mobx-react-lite";
 
-function ViewPageControlPanel({ project }: { project: Project | null }) {
-    const navigate = useNavigate()
-
-    return (
-        <ControlPanel
-            buttons={[
-                <button key="runButton">
-                    <img src="/assets/images/icons/play-white.png" alt="Запустить проект" />
-                </button>,
-                <button key="editButton" onClick={() => { if (project) navigate(`/projects/${project.uid}/edit`, { state: project }) }}>
-                    <img src="/assets/images/icons/pencil-white.png" alt="Редактировать проект" />
-                </button>,
-            ]}
-        />
-    )
+enum ViewPageButton {
+    Run = "run",
+    Edit = "edit",
 }
 
-export function ViewPage() {
+export const ViewPage = observer(() => {
     const { uuid } = useParams()
-    const [project, setProject] = useState<Project | null>(useLocation().state)
+    const navigate = useNavigate()
+    const projectStore = useContext(ProjectStoreContext)
+    const project = useContext(ProjectContext)
 
-    const loadProject = async () => {
-        if (project || !uuid) return
-        const projectUpdate = await getProject(uuid)
-        setProject(projectUpdate)
-    }
+    function editProject(){ navigate(`/projects/${project.uid}/edit`) }
 
-    useEffect(() => { loadProject() })
+    useEffect(() => {
+        async function loadProject(){
+            if (!uuid) return
+            if (project.uid != uuid)
+                project.info = await projectStore.fetchProject(uuid)
+        }
+        void loadProject()
+    }, [uuid, projectStore, project])
 
     return (
         <MainWindow
             header={
-                <PageHeader
-                    title={project?.name || "Project"}
-                    controls={<ViewPageControlPanel project={project} />}
-                />
+                <PageHeader title={project.name}>
+                    <ControlPanelButton
+                        type={ViewPageButton.Run}/>
+                    <ControlPanelButton
+                        type={ViewPageButton.Edit}
+                        onClick={editProject}/>
+                </PageHeader>
             }
-            body={<SimulacrumWindow project={ project } />}
+            body={
+                <ProjectContext.Provider value={project}>
+                    <SimulacrumWindow/>
+                </ProjectContext.Provider>
+            }
         />
     )
-}
+})

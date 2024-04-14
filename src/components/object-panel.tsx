@@ -1,15 +1,13 @@
-import {ChangeEvent, useState} from "react";
-import {Project} from "../data/models.ts";
+import {ChangeEvent, useContext} from "react";
+import {ProjectContext} from "../core/project-store.ts";
+import {runInAction} from "mobx";
+import {observer} from "mobx-react-lite";
 
-export function ObjectPanel({ project = null}: {project: Project | null}) {
-    const [projectName, setProjectName] = useState<string>(project?.name || "")
+export const ObjectPanel = observer(() => {
+    const project = useContext(ProjectContext)
 
-    const onProjectNameChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-        if (!project) return
-        setProjectName(event.target.value)
-        project.name = event.target.value
-        const titles = document.getElementsByClassName("pageTitle")
-        if (titles.length > 0) titles[0].innerHTML = event.target.value
+    const changeProjectName = (event: ChangeEvent<HTMLInputElement>) => {
+        runInAction(() => {project.name = event.target.value})
     }
 
     return (
@@ -18,9 +16,9 @@ export function ObjectPanel({ project = null}: {project: Project | null}) {
             <span>Название проекта</span>
             <input
                 type="text"
-                value={projectName}
-                onChange={onProjectNameChangeHandler}
+                defaultValue={project.name}
+                onChange={changeProjectName}
             />
         </div>
     )
-}
+})

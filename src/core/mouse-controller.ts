@@ -6,9 +6,10 @@ import {
     Vector2,
     Vector3
 } from 'three';
-import {DraggingMode, MouseButton, SimulacrumObject} from './models.ts'
+import {DraggingMode, MouseButton, SimulacrumObject} from './simulacrum-object.ts'
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 import * as THREE from "three";
+import {Project} from "./project.ts";
 
 export class MouseController extends EventDispatcher {
     protected orbitControls: OrbitControls
@@ -27,7 +28,7 @@ export class MouseController extends EventDispatcher {
     constructor(
         protected canvas: HTMLCanvasElement,
         protected camera: OrthographicCamera,
-        protected objects: Record<string, SimulacrumObject>
+        protected project: Project,
     ) {
         super()
         // TODO(erondondron): Плоскости должны задаваться сценой
@@ -101,7 +102,7 @@ export class MouseController extends EventDispatcher {
 
     protected getIntersection(): SimulacrumObject | null {
         this.rayCaster.setFromCamera(this.relativePointer, this.camera)
-        for (const obj of Object.values(this.objects)) {
+        for (const obj of Object.values(this.project.objects)) {
             const intersection = this.rayCaster.intersectObject(obj.instance)
             if (intersection.length !== 0) return obj
         }

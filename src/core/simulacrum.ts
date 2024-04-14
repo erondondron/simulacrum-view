@@ -1,45 +1,56 @@
 import * as THREE from 'three'
-import { Queue, ObjectInfo, ObjectType, SimulacrumState } from '../data/models.ts'
-import { SimulacrumObject } from './models.ts'
-import { MouseController } from './mouse-controller.ts'
+import {Queue} from './queue.ts'
+import {SimulacrumObject} from './simulacrum-object.ts'
+import {MouseController} from './mouse-controller.ts'
+import {ObjectInfo, ObjectType, Project, SimulacrumState} from "./project.ts";
 
-export class SimulacrumCanvas {
+export enum SimulacrumEvent {
+    ResizeWindow = "resize",
+    CreateObject = "createSimulacrumObject"
+}
+export type CreateObjectEventParams = {type: ObjectType}
+
+export class Simulacrum {
     protected renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer({ antialias: true })
-
     protected camera: THREE.OrthographicCamera = new THREE.OrthographicCamera()
-
     protected scene: THREE.Scene = new THREE.Scene()
-    protected objects: Record<string, SimulacrumObject> = {}
 
-    protected mouseController: MouseController = new MouseController(
-        this.renderer.domElement, this.camera, this.objects
-    )
+    protected mouseController: MouseController
 
     protected eventLoop: Queue<SimulacrumState> = new Queue()
     protected stepDuration: number = 1000 / 60
     protected stepTime: number = 0
 
-    constructor() {
+    protected removeEventHandlers: () => void = () => {}
+
+    constructor( protected project: Project) {
         this.scene.background = new THREE.Color(0xfbf0d1)
         this.renderer.setPixelRatio(window.devicePixelRatio)
-        this.registerEvents()
-        this.fitCameraPosition()
+        this.mouseController = new MouseController(
+            this.renderer.domElement, this.camera, project
+        )
+        this.removeEventHandlers = this.registerEventHandlers()
+        void this.initObjects()
         this.animate()
     }
 
-    public createObject(type: ObjectType) {
-        const info = new ObjectInfo()
-        info.type = type
-        const object = this.addObject(info)
-        this.mouseController.draggingObject = object
-        object.instance.position.copy(this.mouseController.absolutePointer)
+    public async initObjects() {
+        await this.project.fetchObjects()
+        for (const obj of Object.values(this.project.objects))
+            this.scene.add(obj.instance)
+        this.fitCameraPosition()
     }
 
-    public addObject(info: ObjectInfo): SimulacrumObject {
+    public dispose() { this.removeEventHandlers() }
+
+    public createNewObject(event: CustomEvent<CreateObjectEventParams>): void{
+        const info = new ObjectInfo()
+        info.type = event.detail.type as ObjectType
         const object = new SimulacrumObject(info)
+        object.instance.position.copy(this.mouseController.absolutePointer)
+        this.project.objects[object.uid] = object
+        this.mouseController.draggingObject = object
         this.scene.add(object.instance)
-        this.objects[object.uid] = object
-        return object
     }
 
     public fitToContainer(container: HTMLDivElement): void {
@@ -70,14 +81,21 @@ export class SimulacrumCanvas {
         const statement = this.eventLoop.dequeue()
         for (const objInfo of statement.objects) {
             if (objInfo.uid) {
-                const object = this.objects[objInfo.uid]
+                const object = this.project.objects[objInfo.uid]
                 object.setObjectPosition(objInfo)
             }
         }
     }
 
-    protected registerEvents() {
-        window.addEventListener('resize', this.resizeCanvas.bind(this))
+    protected registerEventHandlers(): () => void {
+        const resize = this.resizeCanvas.bind(this) as EventListener
+        window.addEventListener(SimulacrumEvent.ResizeWindow, resize)
+        const createObject = this.createNewObject.bind(this) as EventListener
+        document.addEventListener(SimulacrumEvent.CreateObject, createObject)
+        return () => {
+            window.removeEventListener(SimulacrumEvent.ResizeWindow, resize)
+            document.removeEventListener(SimulacrumEvent.CreateObject, createObject)
+        }
     }
 
     protected resizeCanvas(): void {
@@ -92,11 +110,5 @@ export class SimulacrumCanvas {
             container.clientWidth,
             container.clientHeight,
         )
-    }
-
-    public getState(): SimulacrumState {
-        const state = new SimulacrumState()
-        state.objects = Object.values(this.objects).map(item => item.getInfo())
-        return state
     }
 }

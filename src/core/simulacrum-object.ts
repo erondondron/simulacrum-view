@@ -1,5 +1,6 @@
 import * as THREE from 'three'
-import { ObjectInfo, ObjectType } from '../data/models.ts';
+
+import {ObjectInfo, ObjectType} from "./project.ts";
 
 export enum MouseButton {
     Left,

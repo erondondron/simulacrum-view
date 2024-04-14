@@ -1,81 +1,33 @@
 import { useNavigate } from "react-router-dom"
-import { ControlPanel, PageHeader, MainWindow } from "./main-window"
-import { Project } from "../data/models"
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
-import { createNewProject, getProjects } from "../data/requests"
+import { PageHeader, MainWindow, ControlPanelButton } from "./main-window.tsx"
+import {useContext, useEffect} from "react"
+import {observer} from "mobx-react-lite"
+import {ProjectStoreContext} from "../core/project-store.ts"
 
 enum HomePageButton {
-    NewProject,
-    Settings,
-    Information,
+    NewProject = "new-project",
+    Settings = "settings",
+    Information = "information",
 }
 
-function HomePageControlPanel({ handlers = {} }: {
-    handlers?: Partial<Record<HomePageButton, () => void>>
-}) {
-    const defaultHandler = () => { }
-
-    return (
-        <ControlPanel
-            buttons={[
-                <button
-                    key={HomePageButton.NewProject}
-                    onClick={handlers[HomePageButton.NewProject] || defaultHandler}>
-                    <img src="/assets/images/icons/plus-white.png" alt="Новый проект" />
-                </button>,
-
-                <button
-                    key={HomePageButton.Settings}
-                    onClick={handlers[HomePageButton.Settings] || defaultHandler}>
-                    <img src="/assets/images/icons/gear-white.png" alt="Настройки" />
-                </button>,
-
-                <button
-                    key={HomePageButton.Information}
-                    onClick={handlers[HomePageButton.Information] || defaultHandler}>
-                    <img src="/assets/images/icons/info-white.png" alt="Информация" />
-                </button>,
-            ]}
-        />
-    )
-}
-
-type ProjectNavigationRef = {
-    createProject: () => void,
-    updateProjectsList: () => void,
-}
-
-const ProjectsNavigation = forwardRef<ProjectNavigationRef, unknown>((_, ref) => {
+const ProjectsNavigation = observer(() => {
+    const projectStore = useContext(ProjectStoreContext)
     const navigate = useNavigate()
-    const [projects, setProjects] = useState<Project[]>([])
 
-    async function updateProjectsList() {
-        const projectsUpdate = await getProjects()
-        setProjects(projectsUpdate)
+    function selectProject(uid: string) {
+        projectStore.selected.info = projectStore.publicProjects[uid]
+        navigate(`/projects/${uid}`)
     }
 
-    useEffect(() => { void updateProjectsList() }, [navigate])
-    useImperativeHandle(ref, () => {
-        async function createProject() {
-            const project = await createNewProject()
-            navigate(`/projects/${project.uid}/edit`, { state: project })
-        }
-        return {
-            createProject,
-            updateProjectsList,
-        };
-    }, [navigate]);
+    useEffect(() => {void projectStore.fetchProjects()}, [projectStore])
 
     return (
-        <div>
+        <div className="projectsNavigation">
             <h2>Доступные проекты:</h2>
             <ul>
-                {projects.map(project => (
-                    <li key={project.uid} onClick={
-                        () => navigate(
-                            `/projects/${project.uid}`,
-                            { state: project },
-                        )}>
+                {Object.values(projectStore.publicProjects).map(project => (
+                    <li key={project.uid}
+                        onClick={() => selectProject(project.uid)}>
                         {project.name}
                     </li>
                 ))}
@@ -85,21 +37,29 @@ const ProjectsNavigation = forwardRef<ProjectNavigationRef, unknown>((_, ref) =>
 })
 
 export function HomePage() {
-    const projectNavigation = useRef<ProjectNavigationRef>(null)
+    const projectStore = useContext(ProjectStoreContext)
+    const navigate = useNavigate()
 
-    const controlPanelHandlers = {
-        [HomePageButton.NewProject]: () => { projectNavigation.current?.createProject() }
+    async function createNewProject() {
+        const project = await projectStore.createProject()
+        projectStore.selected.info = project
+        navigate(`/projects/${project.uid}/edit`)
     }
 
     return (
         <MainWindow
             header={
-                <PageHeader
-                    title={"Simulacrum"}
-                    controls={ <HomePageControlPanel handlers={controlPanelHandlers} /> }
-                />
+                <PageHeader title={"Simulacrum"}>
+                    <ControlPanelButton
+                        type={HomePageButton.NewProject}
+                        onClick={createNewProject}/>
+                    <ControlPanelButton
+                        type={HomePageButton.Settings}/>
+                    <ControlPanelButton
+                        type={HomePageButton.Information}/>
+                </PageHeader>
             }
-            body={<ProjectsNavigation ref={projectNavigation} />}
+            body={<ProjectsNavigation />}
         />
     )
 }

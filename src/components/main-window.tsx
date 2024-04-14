@@ -1,32 +1,42 @@
-import {ReactElement, ReactNode, forwardRef} from "react"
-import {useNavigate} from "react-router-dom"
+import {ComponentProps, ReactElement, ReactNode} from "react";
+import {useNavigate} from "react-router-dom";
 
-type ControlPanelProps = { buttons?: ReactElement<HTMLButtonElement>[] }
-
-export const ControlPanel = forwardRef<HTMLDivElement, ControlPanelProps>(
-    ({buttons = []}, ref) => {
-        return (
-            <div ref={ref} className="controlPanel">
-                {buttons}
-            </div>
-        )
-    })
-
-type PageHeaderProps = {
-   title: string,
-   controls: ReactElement<typeof ControlPanel>,
+type ButtonProps = {
+    type: string,
+    onClick?: (type: string) => void,
 }
 
-export function PageHeader({title, controls}: PageHeaderProps) {
-    const navigate = useNavigate()
+export function ControlPanelButton(props: ButtonProps) {
+    const handler = props.onClick || (() => {})
+    return (
+        <button key={props.type}
+            onClick={() => {handler(props.type)}}>
+            <img src={`/assets/icons/buttons/${props.type}-white.png`}
+                 alt={props.type} />
+        </button>
+    )
+}
 
+export function ControlPanel(props: ComponentProps<"div">) {
+    return (
+        <div className="controlPanel">
+            {props.children}
+        </div>
+    )
+}
+
+type PageHeaderProps = ComponentProps<"div"> & {title: ReactNode}
+
+export function PageHeader(props: PageHeaderProps) {
+    const navigate = useNavigate()
+    function goToHome() { navigate("/") }
     return (
         <div className="pageHeader">
-            <img src="/assets/logo.svg" alt="Логотип" onClick={() => {
-                navigate("/")
-            }}/>
-            <h1 className="pageTitle">{title}</h1>
-            {controls}
+            <img src="/assets/logo.svg" alt="logo" onClick={goToHome}/>
+            <h1 className="pageTitle">{props.title}</h1>
+            <ControlPanel>
+                {props.children}
+            </ControlPanel>
         </div>
     )
 }
@@ -36,11 +46,11 @@ type MainWindowProps = {
     body: ReactNode,
 }
 
-export function MainWindow({header, body}: MainWindowProps) {
+export function MainWindow(props: MainWindowProps) {
     return (
         <>
-            {header}
-            {body}
+            {props.header}
+            {props.body}
         </>
     )
 }
