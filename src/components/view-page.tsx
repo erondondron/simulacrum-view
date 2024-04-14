@@ -38,7 +38,7 @@ export function ViewPage() {
         <MainWindow
             header={
                 <PageHeader
-                    title={<h1>{project?.name}</h1>}
+                    title={project?.name || "Project"}
                     controls={<ViewPageControlPanel project={project} />}
                 />
             }

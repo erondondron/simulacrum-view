@@ -4,7 +4,7 @@ import {useNavigate} from "react-router-dom"
 type ControlPanelProps = { buttons?: ReactElement<HTMLButtonElement>[] }
 
 export const ControlPanel = forwardRef<HTMLDivElement, ControlPanelProps>(
-    ({buttons}, ref) => {
+    ({buttons = []}, ref) => {
         return (
             <div ref={ref} className="controlPanel">
                 {buttons}
@@ -13,7 +13,7 @@ export const ControlPanel = forwardRef<HTMLDivElement, ControlPanelProps>(
     })
 
 type PageHeaderProps = {
-   title: ReactElement<HTMLHeadElement>,
+   title: string,
    controls: ReactElement<typeof ControlPanel>,
 }
 
@@ -24,8 +24,8 @@ export function PageHeader({title, controls}: PageHeaderProps) {
         <div className="pageHeader">
             <img src="/assets/logo.svg" alt="Логотип" onClick={() => {
                 navigate("/")
-            }}></img>
-            {title}
+            }}/>
+            <h1 className="pageTitle">{title}</h1>
             {controls}
         </div>
     )

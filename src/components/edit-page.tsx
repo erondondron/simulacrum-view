@@ -10,9 +10,9 @@ import {
 } from "../data/requests"
 import { SimulacrumWindow, SimulacrumWindowRef } from "../simulacrum/window"
 import { CatalogPanel } from "./catalog-panel"
+import {ObjectPanel} from "./object-panel.tsx";
 
 enum EditPageButton {
-    Run,
     Save,
     Cancel,
     Delete,
@@ -26,10 +26,6 @@ function EditPageControlPanel({ handlers = {} }: {
     return (
         <ControlPanel
             buttons={[
-                <button key={EditPageButton.Run}
-                    onClick={handlers[EditPageButton.Run] || defaultHandler}>
-                    <img src="/assets/images/icons/play-white.png" alt="Запустить проект" />
-                </button>,
                 <button key={EditPageButton.Save}
                     onClick={handlers[EditPageButton.Save] || defaultHandler}>
                     <img src="/assets/images/icons/floppy-white.png" alt="Сохранить проект" />
@@ -64,7 +60,7 @@ export function EditPage() {
         void saveProject(project)
         const objects = await simulacrumRef.current.getObjects()
         void saveProjectObjects(project.uid, objects)
-        navigate(`/projects/${project.uid}`, { state: project })
+        navigate(`/projects/${project.uid}`)
     }
 
     const onChangesCancelHandler = async (): Promise<void> => {
@@ -91,7 +87,7 @@ export function EditPage() {
         <MainWindow
             header={
                 <PageHeader
-                    title={<h1>{project?.name}</h1>}
+                    title={project?.name || "Project"}
                     controls={controlPanel}/>
             }
             body={
@@ -103,9 +99,7 @@ export function EditPage() {
                         }
                     } />
                     <SimulacrumWindow ref={simulacrumRef} project={project} />
-                    <div className="objectPanel">
-                        <h3>Параметры</h3>
-                    </div>
+                    <ObjectPanel project={project}/>
                 </div>
             }
         />

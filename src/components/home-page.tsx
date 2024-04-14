@@ -95,7 +95,7 @@ export function HomePage() {
         <MainWindow
             header={
                 <PageHeader
-                    title={ <h1>Simulacrum</h1> }
+                    title={"Simulacrum"}
                     controls={ <HomePageControlPanel handlers={controlPanelHandlers} /> }
                 />
             }

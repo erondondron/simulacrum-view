@@ -153,4 +153,14 @@ img {
 }
 .editPage > .objectPanel {
     width: 20%;
+    align-items: start;
+    gap: 5px;
+}
+.editPage > .objectPanel > h3 {
+    width: 100%;
+    line-height: 1.5;
+    padding-bottom: 1em;
+}
+.editPage > .objectPanel > span, input {
+    margin-left: 2em;
 }
