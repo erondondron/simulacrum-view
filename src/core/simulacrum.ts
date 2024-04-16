@@ -6,9 +6,12 @@ import {ObjectInfo, ObjectType, Project, SimulacrumState} from "./project.ts";
 
 export enum SimulacrumEvent {
     ResizeWindow = "resize",
-    CreateObject = "createSimulacrumObject"
+    CreateObject = "createSimulacrumObject",
+    SelectObject = "selectObject",
+    MoveObject = "MoveObject",
 }
 export type CreateObjectEventParams = {type: ObjectType}
+export type SelectObjectEventParams = {object: SimulacrumObject | null}
 
 export class Simulacrum {
     protected renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer({ antialias: true })
@@ -37,7 +40,7 @@ export class Simulacrum {
     public async initObjects() {
         await this.project.fetchObjects()
         for (const obj of Object.values(this.project.objects))
-            this.scene.add(obj.instance)
+            this.scene.add(obj.view.instance)
         this.fitCameraPosition()
     }
 
@@ -46,11 +49,11 @@ export class Simulacrum {
     public createNewObject(event: CustomEvent<CreateObjectEventParams>): void{
         const info = new ObjectInfo()
         info.type = event.detail.type as ObjectType
+        Object.assign(info.position, this.mouseController.absolutePointer)
         const object = new SimulacrumObject(info)
-        object.instance.position.copy(this.mouseController.absolutePointer)
         this.project.objects[object.uid] = object
         this.mouseController.draggingObject = object
-        this.scene.add(object.instance)
+        this.scene.add(object.view.instance)
     }
 
     public fitToContainer(container: HTMLDivElement): void {

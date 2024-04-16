@@ -1,5 +1,4 @@
 import {
-    EventDispatcher,
     OrthographicCamera,
     Plane,
     Raycaster,
@@ -10,8 +9,10 @@ import {DraggingMode, MouseButton, SimulacrumObject} from './simulacrum-object.t
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 import * as THREE from "three";
 import {Project} from "./project.ts";
+import {SelectObjectEventParams, SimulacrumEvent} from "./simulacrum.ts";
+import {runInAction} from "mobx";
 
-export class MouseController extends EventDispatcher {
+export class MouseController {
     protected orbitControls: OrbitControls
     protected rayCaster: Raycaster = new Raycaster()
     public relativePointer: Vector2 = new Vector2()
@@ -30,7 +31,6 @@ export class MouseController extends EventDispatcher {
         protected camera: OrthographicCamera,
         protected project: Project,
     ) {
-        super()
         // TODO(erondondron): Плоскости должны задаваться сценой
         this.plane = new Plane(this.camera.getWorldDirection(new Vector3()))
         this.orbitControls = new OrbitControls(this.camera, this.canvas)
@@ -103,7 +103,7 @@ export class MouseController extends EventDispatcher {
     protected getIntersection(): SimulacrumObject | null {
         this.rayCaster.setFromCamera(this.relativePointer, this.camera)
         for (const obj of Object.values(this.project.objects)) {
-            const intersection = this.rayCaster.intersectObject(obj.instance)
+            const intersection = this.rayCaster.intersectObject(obj.view.instance)
             if (intersection.length !== 0) return obj
         }
         return null
@@ -115,18 +115,18 @@ export class MouseController extends EventDispatcher {
             return
 
         if (this.hoveredObject !== this.selectedObject)
-            this.hoveredObject?.release()
+            this.hoveredObject?.view.release()
 
         this.hoveredObject = intersection
         if (this.hoveredObject !== this.selectedObject)
-            this.hoveredObject?.hover()
+            this.hoveredObject?.view.hover()
     }
 
     protected moveObject(): void {
         if (!this.draggingObject) return
         const intersection = this.rayCaster.ray.intersectPlane(this.plane, new Vector3())
         if (!intersection) return
-        this.draggingObject.instance.position.copy(intersection)
+        Object.assign(this.draggingObject.position, intersection)
     }
 
     protected onPointerMove(event: MouseEvent): void {
@@ -137,7 +137,7 @@ export class MouseController extends EventDispatcher {
             return
         }
         if (this.draggingMode === DraggingMode.Movement){
-            this.moveObject()
+            runInAction(() => {this.moveObject()})
             return
         }
     }
@@ -149,8 +149,14 @@ export class MouseController extends EventDispatcher {
             this.draggingObject = this.selectedObject
             return
         }
-        this.selectedObject?.release()
-        this.hoveredObject?.select()
+        this.selectedObject?.view.release()
+        this.hoveredObject?.view.select()
+
+        const selectEvent = new CustomEvent<SelectObjectEventParams>(
+            SimulacrumEvent.SelectObject,
+            {detail: {object: this.hoveredObject}},
+        )
+        document.dispatchEvent(selectEvent)
     }
 
     protected onPointerUp(event: MouseEvent): void {
@@ -161,11 +167,9 @@ export class MouseController extends EventDispatcher {
             this.setPointer()
             return
         }
-        this.selectedObject?.release()
+        this.selectedObject?.view.release()
         this.selectedObject = this.hoveredObject
-        if (this.selectedObject) {
-            this.selectedObject.select()
-        }
+        this.selectedObject?.view.select()
         this.setPointer()
     }
 }

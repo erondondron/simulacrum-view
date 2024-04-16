@@ -171,4 +171,8 @@ img {
 }
 .editPage > .objectPanel > span, input {
     margin-left: 2em;
+    margin-right: 2em;
+}
+.editPage > .objectPanel > input {
+    width: calc(100% - 5em);
 }
