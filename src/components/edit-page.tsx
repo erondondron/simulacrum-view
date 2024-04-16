@@ -65,7 +65,7 @@ export const EditPage = observer(() => {
                 <ProjectContext.Provider value={project}>
                     <div className="editPage">
                         <CatalogPanel/>
-                        <SimulacrumWindow/>
+                        <SimulacrumWindow editable={true}/>
                         <ObjectPanel/>
                     </div>
                 </ProjectContext.Provider>

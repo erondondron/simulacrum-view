@@ -8,13 +8,6 @@ export enum MouseButton {
     Right,
 }
 
-export enum DraggingMode {
-    Movement,
-    XYRotation,
-    XZRotation,
-    YZRotation,
-}
-
 type DefinedVector = {x: number, y: number, z: number}
 type UndefinedVector = {x?: number, y?: number, z?: number}
 

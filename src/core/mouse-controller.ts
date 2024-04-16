@@ -1,16 +1,18 @@
-import {
-    OrthographicCamera,
-    Plane,
-    Raycaster,
-    Vector2,
-    Vector3
-} from 'three';
-import {DraggingMode, MouseButton, SimulacrumObject} from './simulacrum-object.ts'
+import * as THREE from 'three';
+import {OrthographicCamera, Plane, Raycaster, Vector2, Vector3} from 'three';
+import {MouseButton, SimulacrumObject} from './simulacrum-object.ts'
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
-import * as THREE from "three";
 import {Project} from "./project.ts";
 import {SelectObjectEventParams, SimulacrumEvent} from "./simulacrum.ts";
 import {runInAction} from "mobx";
+
+export enum DraggingMode {
+    Disabled,
+    Movement,
+    XYRotation,
+    XZRotation,
+    YZRotation,
+}
 
 export class MouseController {
     protected orbitControls: OrbitControls
@@ -24,7 +26,7 @@ export class MouseController {
     public selectedObject: SimulacrumObject | null = null
     public draggingObject: SimulacrumObject | null = null
 
-    public draggingMode: DraggingMode = DraggingMode.Movement
+    public draggingMode: DraggingMode = DraggingMode.Disabled
 
     constructor(
         protected canvas: HTMLCanvasElement,
@@ -66,9 +68,10 @@ export class MouseController {
 
     protected setPointer(): void {
         if (
-            this.draggingObject
+            this.draggingMode === DraggingMode.Movement
+            && (this.draggingObject
             || this.selectedObject !== null
-            && this.selectedObject === this.hoveredObject
+            && this.selectedObject === this.hoveredObject)
         ) {
             this.canvas.style.cursor = 'move'
             return
@@ -151,12 +154,6 @@ export class MouseController {
         }
         this.selectedObject?.view.release()
         this.hoveredObject?.view.select()
-
-        const selectEvent = new CustomEvent<SelectObjectEventParams>(
-            SimulacrumEvent.SelectObject,
-            {detail: {object: this.hoveredObject}},
-        )
-        document.dispatchEvent(selectEvent)
     }
 
     protected onPointerUp(event: MouseEvent): void {
@@ -170,6 +167,11 @@ export class MouseController {
         this.selectedObject?.view.release()
         this.selectedObject = this.hoveredObject
         this.selectedObject?.view.select()
+        const selectEvent = new CustomEvent<SelectObjectEventParams>(
+            SimulacrumEvent.SelectObject,
+            {detail: {object: this.hoveredObject}},
+        )
+        document.dispatchEvent(selectEvent)
         this.setPointer()
     }
 }

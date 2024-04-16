@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import {Queue} from './queue.ts'
 import {SimulacrumObject} from './simulacrum-object.ts'
-import {MouseController} from './mouse-controller.ts'
+import {DraggingMode, MouseController} from './mouse-controller.ts'
 import {ObjectInfo, ObjectType, Project, SimulacrumState} from "./project.ts";
 
 export enum SimulacrumEvent {
@@ -26,12 +26,13 @@ export class Simulacrum {
 
     protected removeEventHandlers: () => void = () => {}
 
-    constructor( protected project: Project) {
+    constructor( protected project: Project, editable: boolean = false) {
         this.scene.background = new THREE.Color(0xfbf0d1)
         this.renderer.setPixelRatio(window.devicePixelRatio)
         this.mouseController = new MouseController(
             this.renderer.domElement, this.camera, project
         )
+        if (editable) this.mouseController.draggingMode = DraggingMode.Movement
         this.removeEventHandlers = this.registerEventHandlers()
         void this.initObjects()
         this.animate()
