@@ -163,17 +163,23 @@ img {
 .editPage > .objectPanel {
     width: 20%;
     align-items: start;
-    gap: 5px;
+    gap: 7.5px;
 }
 .editPage > .objectPanel > h3 {
     width: 100%;
     line-height: 1.5;
     padding-bottom: 1em;
 }
-.editPage > .objectPanel > span, input {
+.editPage > .objectPanel > span, label, input {
     margin-left: 2em;
     margin-right: 2em;
+    line-height: 1.5;
 }
-.editPage > .objectPanel > input {
+.editPage > .objectPanel > label {
     width: calc(100% - 5em);
+}
+.editPage > .objectPanel > label > input {
+    max-width: 100%;
+    margin-left: 1em;
+    margin-right: 0;
 }

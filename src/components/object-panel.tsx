@@ -38,20 +38,26 @@ export const ObjectPanel = observer(() => {
                     onChange={changeProjectName}/><p></p></>
             )}
             {object && (
-                <><span>Координата x</span>
-                <input
-                    type="number"
-                    value={object.position.x.toFixed(2)}
-                    onChange={(e) => objectPositionChanged({x: parseFloat(e.target.value)})}
-                /><p></p></>
-            )}
-            {object && (
-                <><span>Координата y</span>
-                <input
-                    type="number"
-                    value={object.position.y.toFixed(2)}
-                    onChange={(e) => objectPositionChanged({y: parseFloat(e.target.value)})}
-                /><p></p></>
+                <>
+                    <span>Начальные координаты, м</span>
+                    <label>
+                        x:
+                        <input
+                            type="number"
+                            value={object.position.x.toFixed(2)}
+                            onChange={(e) => objectPositionChanged({x: parseFloat(e.target.value)})}
+                        />
+                    </label>
+                    <label>
+                        y:
+                        <input
+                            type="number"
+                            value={object.position.y.toFixed(2)}
+                            onChange={(e) => objectPositionChanged({y: parseFloat(e.target.value)})}
+                        />
+                    </label>
+                    <p></p>
+                </>
             )}
         </div>
     )
