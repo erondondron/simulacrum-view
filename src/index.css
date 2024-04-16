@@ -64,6 +64,7 @@ img {
     padding: 10%;
     max-width: 80%;
     -webkit-user-drag: none;
+    -webkit-user-select: none;
 }
 
 /* Настройка светлой темы */
