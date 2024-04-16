@@ -33,6 +33,7 @@ export class Project {
 
     async fetchObjects(): Promise<void> {
         const response = await fetch(`${REST_URL}/projects/${this.uid}/objects`)
+        if (!response.ok) return
         const json: ResponsePayload = await response.json()
         runInAction(() => {
             const state = plainToClass(SimulacrumState, json)
