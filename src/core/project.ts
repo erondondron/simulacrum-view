@@ -85,11 +85,14 @@ export class ObjectInfo {
     uid?: string
     type!: ObjectType
 
-    @Type(() => Vector)
-    position: Vector = new Vector()
+    @Type(() => NumericVector)
+    position: NumericVector = new NumericVector()
 
-    @Type(() => Vector)
-    rotation: Vector = new Vector()
+    @Type(() => NumericVector)
+    rotation: NumericVector = new NumericVector()
+
+    @Type(() => StringVector)
+    motionEquation: StringVector = new StringVector()
 }
 
 export enum ObjectType {
@@ -97,11 +100,20 @@ export enum ObjectType {
     Cube = "cube",
 }
 
-export class Vector {
+export class NumericVector {
     constructor(
         public x: number = 0,
         public y: number = 0,
         public z: number = 0,
+    ) {
+    }
+}
+
+export class StringVector {
+    constructor(
+        public x: string = "",
+        public y: string = "",
+        public z: string = "",
     ) {
     }
 }

@@ -8,40 +8,40 @@ export enum MouseButton {
     Right,
 }
 
-type DefinedVector = {x: number, y: number, z: number}
-type UndefinedVector = {x?: number, y?: number, z?: number}
+type DefinedVector<T> = {x: T, y: T, z: T}
+type UndefinedVector<T> = {x?: T, y?: T, z?: T}
 
-class Vector {
-    protected _x: number = 0
-    protected _y: number = 0
-    protected _z: number = 0
-    protected _bound: DefinedVector | null = null
+class Vector<T> {
+    protected _x!: T
+    protected _y!: T
+    protected _z!: T
+    protected _bound: DefinedVector<T> | null = null
 
-    constructor(values?: UndefinedVector) {
-        if (values) Object.assign(this, values)
+    constructor(values: DefinedVector<T>) {
+        Object.assign(this, values)
         makeAutoObservable(this)
     }
 
-    bind(object: DefinedVector) {this._bound = object}
-    get values(): DefinedVector {return {x: this.x, y: this.y, z: this.z}}
-    set values(values: UndefinedVector) {
+    bind(object: DefinedVector<T>) {this._bound = object}
+    get values(): DefinedVector<T> {return {x: this.x, y: this.y, z: this.z}}
+    set values(values: UndefinedVector<T>) {
         if (values.x !== undefined) this.x = values.x
         if (values.y !== undefined) this.y = values.y
         if (values.z !== undefined) this.z = values.z
     }
 
-    get x(): number {return this._x}
-    set x(value: number) {
+    get x(): T {return this._x}
+    set x(value: T) {
         this._x = value
         if (this._bound) this._bound.x = value
     }
-    get y(): number {return this._y}
-    set y(value: number) {
+    get y(): T {return this._y}
+    set y(value: T) {
         this._y = value
         if (this._bound) this._bound.y = value
     }
-    get z(): number {return this._z}
-    set z(value: number) {
+    get z(): T {return this._z}
+    set z(value: T) {
         this._z = value
         if (this._bound) this._bound.z = value
     }
@@ -87,14 +87,16 @@ export class SimulacrumObject {
     uid: string
     type: ObjectType
     view!: ObjectView
-    position: Vector = new Vector()
-    rotation: Vector = new Vector()
+    position: Vector<number> = new Vector<number>({x: 0, y: 0, z: 0})
+    rotation: Vector<number> = new Vector<number>({x: 0, y: 0, z: 0})
+    motionEquation: Vector<string> = new Vector<string>({x: "", y: "", z: ""})
 
     constructor(info: ObjectInfo) {
         this.view = new ObjectView(info)
         this.type = info.type
         this.position.bind(this.view.instance.position)
         this.rotation.bind(this.view.instance.rotation)
+        this.motionEquation = new Vector<string>(info.motionEquation)
         this.uid = info.uid || this.view.instance.uuid
         this.setObjectPosition(info)
         makeAutoObservable(this)
@@ -111,6 +113,7 @@ export class SimulacrumObject {
         state.type = this.type
         Object.assign(state.position, this.position.values)
         Object.assign(state.rotation, this.rotation.values)
+        Object.assign(state.motionEquation, this.motionEquation.values)
         return state
     }
 }

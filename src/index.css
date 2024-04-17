@@ -25,6 +25,10 @@ html, body {
     padding: 0;
 }
 
+li {
+    cursor: pointer;
+}
+
 div {
     display: flex;
     flex-direction: column;
@@ -160,25 +164,25 @@ img {
 .editPage > .catalogPanel > .modelContainer:hover {
     border-color: rgba(255, 255, 255, 0.25);
 }
-.editPage > .objectPanel {
+.editPage > .propertyPanel {
     width: 20%;
     align-items: start;
     gap: 7.5px;
 }
-.editPage > .objectPanel > h3 {
+.editPage > .propertyPanel > h3 {
     width: 100%;
     line-height: 1.5;
     padding-bottom: 1em;
 }
-.editPage > .objectPanel > span, label, input {
+.editPage > .propertyPanel > span, label, input {
     margin-left: 2em;
     margin-right: 2em;
     line-height: 1.5;
 }
-.editPage > .objectPanel > label {
+.editPage > .propertyPanel > label {
     width: calc(100% - 5em);
 }
-.editPage > .objectPanel > label > input {
+.editPage > .propertyPanel > label > input {
     max-width: 100%;
     margin-left: 1em;
     margin-right: 0;

@@ -1,7 +1,7 @@
 import { useNavigate, useParams} from "react-router-dom"
 import { useContext, useEffect } from "react"
 import { CatalogPanel } from "./catalog-panel"
-import {ObjectPanel} from "./object-panel.tsx";
+import {PropertyPanel} from "./property-panel.tsx";
 import { ProjectInfo } from "../core/project.ts";
 import {ProjectContext, ProjectStoreContext} from "../core/project-store.ts";
 import {ControlPanelButton, MainWindow, PageHeader} from "./main-window.tsx";
@@ -66,7 +66,7 @@ export const EditPage = observer(() => {
                     <div className="editPage">
                         <CatalogPanel/>
                         <SimulacrumWindow editable={true}/>
-                        <ObjectPanel/>
+                        <PropertyPanel/>
                     </div>
                 </ProjectContext.Provider>
             }
