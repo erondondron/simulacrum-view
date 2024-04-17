@@ -1,8 +1,7 @@
 import * as THREE from 'three'
-import {Queue} from './queue.ts'
 import {SimulacrumObject} from './simulacrum-object.ts'
 import {DraggingMode, MouseController} from './mouse-controller.ts'
-import {ObjectInfo, ObjectType, Project, SimulacrumState} from "./project.ts";
+import {ObjectInfo, ObjectType, Project} from "./project.ts";
 
 export enum SimulacrumEvent {
     ResizeWindow = "resize",
@@ -20,7 +19,6 @@ export class Simulacrum {
 
     protected mouseController: MouseController
 
-    protected eventLoop: Queue<SimulacrumState> = new Queue()
     protected stepDuration: number = 1000 / 60
     protected stepTime: number = 0
 
@@ -64,7 +62,7 @@ export class Simulacrum {
 
     public fitCameraPosition(): void {
         // TODO(smirnovas): Нужно менять глубину в зависимости от максимального z + размер объекта
-        this.camera.position.z = 2000
+        this.camera.position.z = 100
     }
 
     protected animate = (): void => {
@@ -79,10 +77,10 @@ export class Simulacrum {
     }
 
     protected aplayStepChanges(): void {
-        if (this.eventLoop.isEmpty())
+        if (this.project.eventLoop.isEmpty())
             return
 
-        const statement = this.eventLoop.dequeue()
+        const statement = this.project.eventLoop.dequeue()
         for (const objInfo of statement.objects) {
             if (objInfo.uid) {
                 const object = this.project.objects[objInfo.uid]

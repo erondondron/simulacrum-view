@@ -18,6 +18,8 @@ export const ViewPage = observer(() => {
 
     function editProject(){ navigate(`/projects/${project.uid}/edit`) }
 
+    function runProject(){project.run()}
+
     useEffect(() => {
         async function loadProject(){
             if (!uuid) return
@@ -32,7 +34,8 @@ export const ViewPage = observer(() => {
             header={
                 <PageHeader title={project.name}>
                     <ControlPanelButton
-                        type={ViewPageButton.Run}/>
+                        type={ViewPageButton.Run}
+                        onClick={runProject}/>
                     <ControlPanelButton
                         type={ViewPageButton.Edit}
                         onClick={editProject}/>

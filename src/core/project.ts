@@ -1,11 +1,12 @@
 import {plainToClass, Type} from "class-transformer"
-import {REST_URL} from "../env.ts"
+import {REST_URL, WS_URL} from "../env.ts"
 import {makeAutoObservable, runInAction} from "mobx"
 import {SimulacrumObject} from "./simulacrum-object.ts";
+import {Queue} from "./queue.ts";
 
 type ResponsePayload = Record<string, unknown>
 
-/*class WebSocketMessage {
+class WebSocketMessage {
     type: WSMessageType = WSMessageType.Response
     payload?: string
 }
@@ -13,12 +14,13 @@ type ResponsePayload = Record<string, unknown>
 enum WSMessageType {
     Request = "request",
     Response = "response",
-}*/
+}
 
 export class Project {
     uid: string = ""
     name: string = ""
     objects: {[uid: string]: SimulacrumObject} = {}
+    eventLoop: Queue<SimulacrumState> = new Queue()
 
     get info(): ProjectInfo{
         const data = {uid: this.uid, name: this.name}
@@ -53,22 +55,25 @@ export class Project {
         })
     }
 
-/*    public runCalculations(): void {
-        const socket = new WebSocket(`${WS_URL}/project/${this.project.uid}/changes`)
+    public run(): void {
+        const socket = new WebSocket(`${WS_URL}/projects/${this.uid}/run`)
         socket.onmessage = (event: MessageEvent) => {
-            const message = plainToClass(WebSocketMessage, JSON.parse(event.data))
+            const json: ResponsePayload = JSON.parse(event.data)
+            const message = plainToClass(WebSocketMessage, json)
             if (message.type == WSMessageType.Request) {
                 const message = new WebSocketMessage()
-                message.payload = JSON.stringify({ length: this.eventLoop.length() })
+                const payload = { length: this.eventLoop.length() }
+                message.payload = JSON.stringify(payload)
                 socket.send(JSON.stringify(message))
                 return
             }
             if (message.payload) {
-                const state = plainToClass(SimulacrumState, JSON.parse(message.payload))
+                const json: ResponsePayload = JSON.parse(message.payload)
+                const state = plainToClass(SimulacrumState, json)
                 this.eventLoop.enqueue(state)
             }
         }
-    }*/
+    }
 }
 
 export class ProjectInfo {
