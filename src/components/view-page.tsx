@@ -1,4 +1,4 @@
-import {useContext, useEffect} from 'react'
+import {useContext, useEffect, useState} from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {SimulacrumWindow} from "./simulacrum-window.tsx";
 import {ProjectContext, ProjectStoreContext} from "../core/project-store.ts";
@@ -7,6 +7,7 @@ import {observer} from "mobx-react-lite";
 
 enum ViewPageButton {
     Run = "run",
+    Stop = "stop",
     Edit = "edit",
 }
 
@@ -15,10 +16,17 @@ export const ViewPage = observer(() => {
     const navigate = useNavigate()
     const projectStore = useContext(ProjectStoreContext)
     const project = useContext(ProjectContext)
+    const [calculation, setCalculation] = useState<WebSocket | null>(null)
 
     function editProject(){ navigate(`/projects/${project.uid}/edit`) }
 
-    function runProject(){project.run()}
+    function runCalculation(){setCalculation(project.run())}
+
+    function stopCalculation(){
+        if (calculation) calculation.close()
+        project.eventLoop.clear()
+        setCalculation(null)
+    }
 
     useEffect(() => {
         async function loadProject(){
@@ -27,15 +35,19 @@ export const ViewPage = observer(() => {
                 project.info = await projectStore.fetchProject(uuid)
         }
         void loadProject()
-    }, [uuid, projectStore, project])
+        return () => {if (calculation) calculation.close()}
+    }, [uuid, projectStore, project, calculation])
 
     return (
         <MainWindow
             header={
                 <PageHeader title={project.name}>
-                    <ControlPanelButton
+                    {!calculation && <ControlPanelButton
                         type={ViewPageButton.Run}
-                        onClick={runProject}/>
+                        onClick={runCalculation}/>}
+                    {calculation && <ControlPanelButton
+                        type={ViewPageButton.Stop}
+                        onClick={stopCalculation}/>}
                     <ControlPanelButton
                         type={ViewPageButton.Edit}
                         onClick={editProject}/>

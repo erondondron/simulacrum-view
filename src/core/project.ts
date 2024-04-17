@@ -55,7 +55,7 @@ export class Project {
         })
     }
 
-    public run(): void {
+    public run(): WebSocket {
         const socket = new WebSocket(`${WS_URL}/projects/${this.uid}/run`)
         socket.onmessage = (event: MessageEvent) => {
             const json: ResponsePayload = JSON.parse(event.data)
@@ -73,6 +73,7 @@ export class Project {
                 this.eventLoop.enqueue(state)
             }
         }
+        return socket
     }
 }
 

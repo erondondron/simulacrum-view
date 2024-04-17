@@ -3,6 +3,12 @@ export class Queue<T> {
     private start: number = 0;
     private end: number = 0;
 
+    public clear(): void {
+        this.start = 0
+        this.end = 0
+        this.data = {}
+    }
+
     public length(): number {
         return this.end - this.start;
     }
